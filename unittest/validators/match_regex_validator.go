@@ -29,31 +29,51 @@ Actual:%s
 
 // Validate implement Validatable
 func (v MatchRegexValidator) Validate(context *ValidateContext) (bool, []string) {
-	manifest, err := context.getManifest()
+	manifests, err := context.getManifests()
 	if err != nil {
 		return false, splitInfof(errorFormat, err.Error())
 	}
 
-	actual, err := valueutils.GetValueOfSetPath(manifest, v.Path)
-	if err != nil {
-		return false, splitInfof(errorFormat, err.Error())
-	}
+	validateSuccess := true
+	validateErrors := make([]string, 0)
 
-	p, err := regexp.Compile(v.Pattern)
-	if err != nil {
-		return false, splitInfof(errorFormat, err.Error())
-	}
-
-	if s, ok := actual.(string); ok {
-		if p.MatchString(s) != context.Negative {
-			return true, []string{}
+	for _, manifest := range manifests {
+		actual, err := valueutils.GetValueOfSetPath(manifest, v.Path)
+		if err != nil {
+			validateSuccess = validateSuccess && false
+			errorMessage := splitInfof(errorFormat, err.Error())
+			validateErrors = append(validateErrors, errorMessage...)
+			continue
 		}
-		return false, v.failInfo(s, context.Negative)
+
+		p, err := regexp.Compile(v.Pattern)
+		if err != nil {
+			validateSuccess = validateSuccess && false
+			errorMessage := splitInfof(errorFormat, err.Error())
+			validateErrors = append(validateErrors, errorMessage...)
+			continue
+		}
+
+		if s, ok := actual.(string); ok {
+			if p.MatchString(s) == context.Negative {
+				validateSuccess = validateSuccess && false
+				errorMessage := v.failInfo(s, context.Negative)
+				validateErrors = append(validateErrors, errorMessage...)
+				continue
+			}
+
+			validateSuccess = validateSuccess && true
+			continue
+		}
+
+		validateSuccess = validateSuccess && false
+		errorMessage := splitInfof(errorFormat, fmt.Sprintf(
+			"expect '%s' to be a string, got:\n%s",
+			v.Path,
+			common.TrustedMarshalYAML(actual),
+		))
+		validateErrors = append(validateErrors, errorMessage...)
 	}
 
-	return false, splitInfof(errorFormat, fmt.Sprintf(
-		"expect '%s' to be a string, got:\n%s",
-		v.Path,
-		common.TrustedMarshalYAML(actual),
-	))
+	return validateSuccess, validateErrors
 }

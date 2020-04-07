@@ -33,20 +33,34 @@ Expected` + notAnnotation + ` to match snapshot ` + strconv.Itoa(int(compared.In
 
 // Validate implement Validatable
 func (v MatchSnapshotValidator) Validate(context *ValidateContext) (bool, []string) {
-	manifest, err := context.getManifest()
+	manifests, err := context.getManifests()
 	if err != nil {
 		return false, splitInfof(errorFormat, err.Error())
 	}
 
-	actual, err := valueutils.GetValueOfSetPath(manifest, v.Path)
-	if err != nil {
-		return false, splitInfof(errorFormat, err.Error())
+	validateSuccess := true
+	validateErrors := make([]string, 0)
+
+	for _, manifest := range manifests {
+		actual, err := valueutils.GetValueOfSetPath(manifest, v.Path)
+		if err != nil {
+			validateSuccess = validateSuccess && false
+			errorMessage := splitInfof(errorFormat, err.Error())
+			validateErrors = append(validateErrors, errorMessage...)
+			continue
+		}
+
+		result := context.CompareToSnapshot(actual)
+
+		if result.Passed == context.Negative {
+			validateSuccess = validateSuccess && false
+			errorMessage := v.failInfo(result, context.Negative)
+			validateErrors = append(validateErrors, errorMessage...)
+			continue
+		}
+
+		validateSuccess = validateSuccess == true
 	}
 
-	result := context.CompareToSnapshot(actual)
-
-	if result.Passed != context.Negative {
-		return true, []string{}
-	}
-	return false, v.failInfo(result, context.Negative)
+	return validateSuccess, validateErrors
 }

@@ -36,6 +36,56 @@ func TestV2ParseTestSuiteFileOk(t *testing.T) {
 	a.Equal(suite.Tests[0].Name, "should pass all kinds of assertion")
 }
 
+func TestV2RunSuiteWithMultipleTemplatesWhenPass(t *testing.T) {
+	c, _ := v2util.Load("../__fixtures__/v2/basic")
+	suiteDoc := `
+suite: validate metadata
+templates:
+  - deployment.yaml
+  - ingress.yaml
+  - service.yaml
+tests:
+  - it: should pass all metadata
+    set:
+      ingress.enabled: true
+    asserts:
+      - matchRegex:
+          path: metadata.name
+          pattern: ^RELEASE-NAME-basic
+      - equal:
+          path: metadata.labels.app
+          value: basic
+      - matchRegex:
+          path: metadata.labels.chart
+          pattern: ^basic-
+      - equal:
+          path: metadata.labels.release
+          value: RELEASE-NAME
+      - equal:
+          path: metadata.labels.heritage
+          value: Tiller
+      - matchSnapshot: {}
+`
+	testSuite := TestSuite{}
+	yaml.Unmarshal([]byte(suiteDoc), &testSuite)
+
+	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "my_test.yaml"), false)
+	suiteResult := testSuite.RunV2(c, cache, &TestSuiteResult{})
+
+	a := assert.New(t)
+	cupaloy.SnapshotT(t, makeTestSuiteResultSnapshotable(suiteResult))
+
+	a.True(suiteResult.Passed)
+	a.Nil(suiteResult.ExecError)
+	a.Equal(1, len(suiteResult.TestsResult))
+	a.Equal("validate metadata", suiteResult.DisplayName)
+
+	a.Equal(uint(4), suiteResult.SnapshotCounting.Created)
+	a.Equal(uint(4), suiteResult.SnapshotCounting.Total)
+	a.Equal(uint(0), suiteResult.SnapshotCounting.Failed)
+	a.Equal(uint(0), suiteResult.SnapshotCounting.Vanished)
+}
+
 func TestV2RunSuiteWhenPass(t *testing.T) {
 	c, _ := v2util.Load("../__fixtures__/v2/basic")
 	suiteDoc := `
@@ -64,8 +114,8 @@ tests:
 	a.Equal(1, len(suiteResult.TestsResult))
 	a.Equal("test suite name", suiteResult.DisplayName)
 
-	a.Equal(uint(1), suiteResult.SnapshotCounting.Created)
-	a.Equal(uint(1), suiteResult.SnapshotCounting.Total)
+	a.Equal(uint(2), suiteResult.SnapshotCounting.Created)
+	a.Equal(uint(2), suiteResult.SnapshotCounting.Total)
 	a.Equal(uint(0), suiteResult.SnapshotCounting.Failed)
 	a.Equal(uint(0), suiteResult.SnapshotCounting.Vanished)
 }
@@ -108,6 +158,56 @@ func TestV3ParseTestSuiteFileOk(t *testing.T) {
 	a.Equal(suite.Tests[0].Name, "should pass all kinds of assertion")
 }
 
+func TestV3RunSuiteWithMultipleTemplatesWhenPass(t *testing.T) {
+	c, _ := loader.Load("../__fixtures__/v3/basic")
+	suiteDoc := `
+suite: validate metadata
+templates:
+  - deployment.yaml
+  - ingress.yaml
+  - service.yaml
+tests:
+  - it: should pass all metadata
+    set:
+      ingress.enabled: true
+    asserts:
+      - matchRegex:
+          path: metadata.name
+          pattern: ^RELEASE-NAME-basic
+      - equal:
+          path: metadata.labels.app
+          value: basic
+      - matchRegex:
+          path: metadata.labels.chart
+          pattern: ^basic-
+      - equal:
+          path: metadata.labels.release
+          value: RELEASE-NAME
+      - equal:
+          path: metadata.labels.heritage
+          value: Helm
+      - matchSnapshot: {}
+`
+	testSuite := TestSuite{}
+	yaml.Unmarshal([]byte(suiteDoc), &testSuite)
+
+	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "my_test.yaml"), false)
+	suiteResult := testSuite.RunV3(c, cache, &TestSuiteResult{})
+
+	a := assert.New(t)
+	cupaloy.SnapshotT(t, makeTestSuiteResultSnapshotable(suiteResult))
+
+	a.True(suiteResult.Passed)
+	a.Nil(suiteResult.ExecError)
+	a.Equal(1, len(suiteResult.TestsResult))
+	a.Equal("validate metadata", suiteResult.DisplayName)
+
+	a.Equal(uint(4), suiteResult.SnapshotCounting.Created)
+	a.Equal(uint(4), suiteResult.SnapshotCounting.Total)
+	a.Equal(uint(0), suiteResult.SnapshotCounting.Failed)
+	a.Equal(uint(0), suiteResult.SnapshotCounting.Vanished)
+}
+
 func TestV3RunSuiteWhenPass(t *testing.T) {
 	c, _ := loader.Load("../__fixtures__/v3/basic")
 	suiteDoc := `
@@ -136,8 +236,8 @@ tests:
 	a.Equal(1, len(suiteResult.TestsResult))
 	a.Equal("test suite name", suiteResult.DisplayName)
 
-	a.Equal(uint(1), suiteResult.SnapshotCounting.Created)
-	a.Equal(uint(1), suiteResult.SnapshotCounting.Total)
+	a.Equal(uint(2), suiteResult.SnapshotCounting.Created)
+	a.Equal(uint(2), suiteResult.SnapshotCounting.Total)
 	a.Equal(uint(0), suiteResult.SnapshotCounting.Failed)
 	a.Equal(uint(0), suiteResult.SnapshotCounting.Vanished)
 }

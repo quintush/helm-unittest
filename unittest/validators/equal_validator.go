@@ -45,18 +45,32 @@ Diff:
 
 // Validate implement Validatable
 func (a EqualValidator) Validate(context *ValidateContext) (bool, []string) {
-	manifest, err := context.getManifest()
+	manifests, err := context.getManifests()
 	if err != nil {
 		return false, splitInfof(errorFormat, err.Error())
 	}
 
-	actual, err := valueutils.GetValueOfSetPath(manifest, a.Path)
-	if err != nil {
-		return false, splitInfof(errorFormat, err.Error())
+	validateSuccess := true
+	validateErrors := make([]string, 0)
+
+	for _, manifest := range manifests {
+		actual, err := valueutils.GetValueOfSetPath(manifest, a.Path)
+		if err != nil {
+			validateSuccess = validateSuccess && false
+			errorMessage := splitInfof(errorFormat, err.Error())
+			validateErrors = append(validateErrors, errorMessage...)
+			continue
+		}
+
+		if reflect.DeepEqual(a.Value, actual) == context.Negative {
+			validateSuccess = validateSuccess && false
+			errorMessage := a.failInfo(actual, context.Negative)
+			validateErrors = append(validateErrors, errorMessage...)
+			continue
+		}
+
+		validateSuccess = validateSuccess && true
 	}
 
-	if reflect.DeepEqual(a.Value, actual) == context.Negative {
-		return false, a.failInfo(actual, context.Negative)
-	}
-	return true, []string{}
+	return validateSuccess, validateErrors
 }

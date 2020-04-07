@@ -22,11 +22,18 @@ type ValidateContext struct {
 	SnapshotComparer
 }
 
-func (c *ValidateContext) getManifest() (common.K8sManifest, error) {
+func (c *ValidateContext) getManifests() ([]common.K8sManifest, error) {
+	manifests := make([]common.K8sManifest, 0)
+	if c.Index == -1 {
+		manifests = append(manifests, c.Docs...)
+		return manifests, nil
+	}
+
 	if len(c.Docs) <= c.Index {
 		return nil, fmt.Errorf("documentIndex %d out of range", c.Index)
 	}
-	return c.Docs[c.Index], nil
+	manifests = append(manifests, c.Docs[c.Index])
+	return manifests, nil
 }
 
 // Validatable all validators must implement Validate method

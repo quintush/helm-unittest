@@ -21,13 +21,24 @@ func (v IsKindValidator) failInfo(actual interface{}, not bool) []string {
 
 // Validate implement Validatable
 func (v IsKindValidator) Validate(context *ValidateContext) (bool, []string) {
-	manifest, err := context.getManifest()
+	manifests, err := context.getManifests()
 	if err != nil {
 		return false, splitInfof(errorFormat, err.Error())
 	}
 
-	if kind, ok := manifest["kind"].(string); (ok && kind == v.Of) != context.Negative {
-		return true, []string{}
+	validateSuccess := true
+	validateErrors := make([]string, 0)
+
+	for _, manifest := range manifests {
+		if kind, ok := manifest["kind"].(string); (ok && kind == v.Of) == context.Negative {
+			validateSuccess = validateSuccess && false
+			errorMessage := v.failInfo(manifest["kind"], context.Negative)
+			validateErrors = append(validateErrors, errorMessage...)
+			continue
+		}
+
+		validateSuccess = validateSuccess && true
 	}
-	return false, v.failInfo(manifest["kind"], context.Negative)
+
+	return validateSuccess, validateErrors
 }
