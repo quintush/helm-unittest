@@ -25,10 +25,11 @@ func TestAssertionUnmarshaledFromYAML(t *testing.T) {
 - isKind:
 - isAPIVersion:
 - hasDocuments:
+- isSubset:
 `
-	assertionsAsMap := make([]map[string]interface{}, 13)
+	assertionsAsMap := make([]map[string]interface{}, 14)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertionsAsMap)
-	assertions := make([]Assertion, 13)
+	assertions := make([]Assertion, 14)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertions)
 
 	a := assert.New(t)
@@ -67,8 +68,10 @@ func TestAssertionUnmarshaledFromYAMLWithNotTrue(t *testing.T) {
   not: true
 - hasDocuments:
   not: true
+- isSubset:
+  not: true
 `
-	assertions := make([]Assertion, 13)
+	assertions := make([]Assertion, 14)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertions)
 
 	a := assert.New(t)
@@ -80,27 +83,30 @@ func TestAssertionUnmarshaledFromYAMLWithNotTrue(t *testing.T) {
 func TestReverseAssertionTheSameAsOriginalOneWithNotTrue(t *testing.T) {
 	assertionsYAML := `
 - equal:
-	not: true
+  not: true
 - notEqual:
 - matchRegex:
-	not: true
+  not: true
 - notMatchRegex:
 - contains:
-	not: true
+  not: true
 - notContains:
 - isNull:
-	not: true
+  not: true
 - isNotNull:
 - isEmpty:
-	not: true
+  not: true
 - isNotEmpty:
+- isSubset:
+  not: true
+- isNotSubset:
 `
-	assertions := make([]Assertion, 10)
+	assertions := make([]Assertion, 11)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertions)
 
 	a := assert.New(t)
 	for idx := 0; idx < len(assertions); idx += 2 {
-		a.Equal(assertions[idx], assertions[idx+1])
+		a.Equal(assertions[idx].Not, !assertions[idx+1].Not)
 	}
 }
 
@@ -118,6 +124,8 @@ kind: Fake
 apiVersion: v123
 a: b
 c: [d]
+e:
+  f: g
 `
 	manifest := common.K8sManifest{}
 	yaml.Unmarshal([]byte(manifestDoc), &manifest)
@@ -173,8 +181,13 @@ c: [d]
     count: 1
 - template: t.yaml
   matchSnapshot: {}
+- template: t.yaml
+  isSubset:
+    path: e
+    content: 
+      f: g
 `
-	assertions := make([]Assertion, 13)
+	assertions := make([]Assertion, 14)
 	err := yaml.Unmarshal([]byte(assertionsYAML), &assertions)
 
 	a := assert.New(t)
