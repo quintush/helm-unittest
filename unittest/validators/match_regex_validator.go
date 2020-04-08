@@ -14,7 +14,7 @@ type MatchRegexValidator struct {
 	Pattern string
 }
 
-func (v MatchRegexValidator) failInfo(actual string, not bool) []string {
+func (v MatchRegexValidator) failInfo(actual string, index int, not bool) []string {
 	var notAnnotation = ""
 	if not {
 		notAnnotation = " NOT"
@@ -24,24 +24,24 @@ Path:%s
 Expected` + notAnnotation + ` to match:%s
 Actual:%s
 `
-	return splitInfof(regexFailFormat, v.Path, v.Pattern, actual)
+	return splitInfof(regexFailFormat, index, v.Path, v.Pattern, actual)
 }
 
 // Validate implement Validatable
 func (v MatchRegexValidator) Validate(context *ValidateContext) (bool, []string) {
 	manifests, err := context.getManifests()
 	if err != nil {
-		return false, splitInfof(errorFormat, err.Error())
+		return false, splitInfof(errorFormat, -1, err.Error())
 	}
 
 	validateSuccess := true
 	validateErrors := make([]string, 0)
 
-	for _, manifest := range manifests {
+	for idx, manifest := range manifests {
 		actual, err := valueutils.GetValueOfSetPath(manifest, v.Path)
 		if err != nil {
 			validateSuccess = validateSuccess && false
-			errorMessage := splitInfof(errorFormat, err.Error())
+			errorMessage := splitInfof(errorFormat, idx, err.Error())
 			validateErrors = append(validateErrors, errorMessage...)
 			continue
 		}
@@ -49,15 +49,15 @@ func (v MatchRegexValidator) Validate(context *ValidateContext) (bool, []string)
 		p, err := regexp.Compile(v.Pattern)
 		if err != nil {
 			validateSuccess = validateSuccess && false
-			errorMessage := splitInfof(errorFormat, err.Error())
+			errorMessage := splitInfof(errorFormat, -1, err.Error())
 			validateErrors = append(validateErrors, errorMessage...)
-			continue
+			break
 		}
 
 		if s, ok := actual.(string); ok {
 			if p.MatchString(s) == context.Negative {
 				validateSuccess = validateSuccess && false
-				errorMessage := v.failInfo(s, context.Negative)
+				errorMessage := v.failInfo(s, idx, context.Negative)
 				validateErrors = append(validateErrors, errorMessage...)
 				continue
 			}
@@ -67,7 +67,7 @@ func (v MatchRegexValidator) Validate(context *ValidateContext) (bool, []string)
 		}
 
 		validateSuccess = validateSuccess && false
-		errorMessage := splitInfof(errorFormat, fmt.Sprintf(
+		errorMessage := splitInfof(errorFormat, idx, fmt.Sprintf(
 			"expect '%s' to be a string, got:\n%s",
 			v.Path,
 			common.TrustedMarshalYAML(actual),

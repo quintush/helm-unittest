@@ -15,7 +15,7 @@ type ContainsValidator struct {
 	Content interface{}
 }
 
-func (v ContainsValidator) failInfo(actual interface{}, not bool) []string {
+func (v ContainsValidator) failInfo(actual interface{}, index int, not bool) []string {
 	var notAnnotation string
 	if not {
 		notAnnotation = " NOT"
@@ -29,6 +29,7 @@ Actual:
 `
 	return splitInfof(
 		containsFailFormat,
+		index,
 		v.Path,
 		common.TrustedMarshalYAML([]interface{}{v.Content}),
 		common.TrustedMarshalYAML(actual),
@@ -39,17 +40,17 @@ Actual:
 func (v ContainsValidator) Validate(context *ValidateContext) (bool, []string) {
 	manifests, err := context.getManifests()
 	if err != nil {
-		return false, splitInfof(errorFormat, err.Error())
+		return false, splitInfof(errorFormat, -1, err.Error())
 	}
 
 	validateSuccess := true
 	validateErrors := make([]string, 0)
 
-	for _, manifest := range manifests {
+	for idx, manifest := range manifests {
 		actual, err := valueutils.GetValueOfSetPath(manifest, v.Path)
 		if err != nil {
 			validateSuccess = validateSuccess && false
-			errorMessage := splitInfof(errorFormat, err.Error())
+			errorMessage := splitInfof(errorFormat, idx, err.Error())
 			validateErrors = append(validateErrors, errorMessage...)
 			continue
 		}
@@ -64,7 +65,7 @@ func (v ContainsValidator) Validate(context *ValidateContext) (bool, []string) {
 
 			if found == context.Negative {
 				validateSuccess = validateSuccess && false
-				errorMessage := v.failInfo(actual, context.Negative)
+				errorMessage := v.failInfo(actual, idx, context.Negative)
 				validateErrors = append(validateErrors, errorMessage...)
 				continue
 			}
@@ -75,7 +76,7 @@ func (v ContainsValidator) Validate(context *ValidateContext) (bool, []string) {
 
 		actualYAML, _ := yaml.Marshal(actual)
 		validateSuccess = validateSuccess && false
-		errorMessage := splitInfof(errorFormat, fmt.Sprintf(
+		errorMessage := splitInfof(errorFormat, idx, fmt.Sprintf(
 			"expect '%s' to be an array, got:\n%s",
 			v.Path,
 			string(actualYAML),

@@ -42,7 +42,7 @@ type Validatable interface {
 }
 
 // splitInfof split multi line string into array of string
-func splitInfof(format string, replacements ...string) []string {
+func splitInfof(format string, index int, replacements ...string) []string {
 	intentedFormat := strings.Trim(format, "\t\n ")
 	indentedReplacements := make([]interface{}, len(replacements))
 	for i, r := range replacements {
@@ -51,10 +51,18 @@ func splitInfof(format string, replacements ...string) []string {
 			"\n\t ",
 		)
 	}
-	return strings.Split(
+
+	splittedStrings := strings.Split(
 		fmt.Sprintf(intentedFormat, indentedReplacements...),
 		"\n",
 	)
+
+	if index >= 0 {
+		indexedString := []string{fmt.Sprintf("DocumentIndex:\t%d", index)}
+		splittedStrings = append(indexedString, splittedStrings...)
+	}
+
+	return splittedStrings
 }
 
 // diff return diff result for assertion

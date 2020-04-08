@@ -12,7 +12,7 @@ type MatchSnapshotValidator struct {
 	Path string
 }
 
-func (v MatchSnapshotValidator) failInfo(compared *snapshot.CompareResult, not bool) []string {
+func (v MatchSnapshotValidator) failInfo(compared *snapshot.CompareResult, index int, not bool) []string {
 	var notAnnotation = ""
 	if not {
 		notAnnotation = " NOT"
@@ -28,24 +28,24 @@ Expected` + notAnnotation + ` to match snapshot ` + strconv.Itoa(int(compared.In
 	} else {
 		infoToShow = diff(compared.CachedSnapshot, compared.NewSnapshot)
 	}
-	return splitInfof(snapshotFailFormat, v.Path, infoToShow)
+	return splitInfof(snapshotFailFormat, index, v.Path, infoToShow)
 }
 
 // Validate implement Validatable
 func (v MatchSnapshotValidator) Validate(context *ValidateContext) (bool, []string) {
 	manifests, err := context.getManifests()
 	if err != nil {
-		return false, splitInfof(errorFormat, err.Error())
+		return false, splitInfof(errorFormat, -1, err.Error())
 	}
 
 	validateSuccess := true
 	validateErrors := make([]string, 0)
 
-	for _, manifest := range manifests {
+	for idx, manifest := range manifests {
 		actual, err := valueutils.GetValueOfSetPath(manifest, v.Path)
 		if err != nil {
 			validateSuccess = validateSuccess && false
-			errorMessage := splitInfof(errorFormat, err.Error())
+			errorMessage := splitInfof(errorFormat, idx, err.Error())
 			validateErrors = append(validateErrors, errorMessage...)
 			continue
 		}
@@ -54,7 +54,7 @@ func (v MatchSnapshotValidator) Validate(context *ValidateContext) (bool, []stri
 
 		if result.Passed == context.Negative {
 			validateSuccess = validateSuccess && false
-			errorMessage := v.failInfo(result, context.Negative)
+			errorMessage := v.failInfo(result, idx, context.Negative)
 			validateErrors = append(validateErrors, errorMessage...)
 			continue
 		}

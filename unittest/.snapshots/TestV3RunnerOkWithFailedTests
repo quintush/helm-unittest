@@ -8,6 +8,7 @@
 		- asserts[0] `equal` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	spec.template.spec.containers[0].image
 			Expected:
 				nginx:stable
@@ -19,6 +20,7 @@
 				@@ -1,2 +1,2 @@
 				-nginx:stable
 				+apache:latest
+			DocumentIndex:	1
 			Path:	spec.template.spec.containers[0].image
 			Expected:
 				nginx:stable
@@ -34,9 +36,11 @@
 		- asserts[1] `notEqual` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	spec.template.spec.containers[0].image
 			Expected NOT to equal:
 				apache:latest
+			DocumentIndex:	1
 			Path:	spec.template.spec.containers[0].image
 			Expected NOT to equal:
 				apache:latest
@@ -44,9 +48,11 @@
 		- asserts[2] `matchRegex` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	metadata.name
 			Expected to match:	^.*-foobar$
 			Actual:	RELEASE-NAME-basic
+			DocumentIndex:	1
 			Path:	metadata.name
 			Expected to match:	^.*-foobar$
 			Actual:	RELEASE-NAME-basic-db
@@ -54,6 +60,7 @@
 		- asserts[3] `notMatchRegex` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	metadata.name
 			Expected NOT to match:	^.*-basic$
 			Actual:	RELEASE-NAME-basic
@@ -61,11 +68,13 @@
 		- asserts[4] `contains` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	spec.template.spec.containers[0].ports
 			Expected to contain:
 				- containerPort: 80
 			Actual:
 				- containerPort: 8080
+			DocumentIndex:	1
 			Path:	spec.template.spec.containers[0].ports
 			Expected to contain:
 				- containerPort: 80
@@ -75,6 +84,7 @@
 		- asserts[5] `notContains` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	spec.template.spec.containers[0].ports
 			Expected NOT to contain:
 				- containerPort: 8080
@@ -84,6 +94,7 @@
 		- asserts[6] `isNull` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	spec.template
 			Expected to be null, got:
 				metadata:
@@ -106,6 +117,7 @@
 				        path: /
 				        port: 8080
 				    resources: {}
+			DocumentIndex:	1
 			Path:	spec.template
 			Expected to be null, got:
 				metadata:
@@ -128,9 +140,11 @@
 		- asserts[7] `isNotNull` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	spec.template.nodeSelector
 			Expected NOT to be null, got:
 				null
+			DocumentIndex:	1
 			Path:	spec.template.nodeSelector
 			Expected NOT to be null, got:
 				null
@@ -138,6 +152,7 @@
 		- asserts[8] `isEmpty` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	spec.template.spec.containers[0]
 			Expected to be empty, got:
 				image: apache:latest
@@ -154,6 +169,7 @@
 				    path: /
 				    port: 8080
 				resources: {}
+			DocumentIndex:	1
 			Path:	spec.template.spec.containers[0]
 			Expected to be empty, got:
 				image: apache:latest
@@ -165,9 +181,11 @@
 		- asserts[9] `isNotEmpty` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Path:	spec.template.spec.containers[0].resources
 			Expected NOT to be empty, got:
 				{}
+			DocumentIndex:	1
 			Path:	spec.template.spec.containers[0].resources
 			Expected NOT to be empty, got:
 				null
@@ -175,16 +193,20 @@
 		- asserts[10] `isKind` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Expected kind:	Pod
 			Actual:	Deployment
+			DocumentIndex:	1
 			Expected kind:	Pod
 			Actual:	Deployment
 
 		- asserts[11] `isAPIVersion` fail
 
 			Template:	basic/templates/deployment.yaml
+			DocumentIndex:	0
 			Expected apiVersion:	v2
 			Actual:	extensions/v1beta1
+			DocumentIndex:	1
 			Expected apiVersion:	v2
 			Actual:	extensions/v1beta1
 
@@ -207,6 +229,7 @@
 		- asserts[0] `contains` fail
 
 			Template:	basic/templates/ingress.yaml
+			DocumentIndex:	0
 			Path:	spec.rules[0].http.paths
 			Expected to contain:
 				- backend:
@@ -222,6 +245,7 @@
 		- asserts[1] `isNotNull` fail
 
 			Template:	basic/templates/ingress.yaml
+			DocumentIndex:	0
 			Path:	spec.tls
 			Expected NOT to be null, got:
 				null
@@ -231,6 +255,7 @@
 		- asserts[0] `isEmpty` fail
 
 			Template:	basic/templates/ingress.yaml
+			DocumentIndex:	0
 			Path:	metadata.annotations
 			Expected to be empty, got:
 				ingress.kubernetes.io/rewrite-target: /
@@ -242,6 +267,7 @@
 		- asserts[0] `equal` fail
 
 			Template:	basic/templates/ingress.yaml
+			DocumentIndex:	0
 			Path:	spec.tls
 			Expected:
 				- secretName: my-tls-secret
@@ -259,6 +285,7 @@
 		- asserts[0] `notContains` fail
 
 			Template:	basic/templates/service.yaml
+			DocumentIndex:	0
 			Path:	spec.ports
 			Expected NOT to contain:
 				- name: nginx
@@ -274,6 +301,7 @@
 		- asserts[1] `notEqual` fail
 
 			Template:	basic/templates/service.yaml
+			DocumentIndex:	0
 			Path:	spec.type
 			Expected NOT to equal:
 				ClusterIP
@@ -281,6 +309,7 @@
 		- asserts[2] `notEqual` fail
 
 			Template:	basic/templates/service.yaml
+			DocumentIndex:	0
 			Path:	spec.selector
 			Expected NOT to equal:
 				app: basic
@@ -291,6 +320,7 @@
 		- asserts[0] `notContains` fail
 
 			Template:	basic/templates/service.yaml
+			DocumentIndex:	0
 			Path:	spec.ports
 			Expected NOT to contain:
 				- name: cool-service
@@ -306,6 +336,7 @@
 		- asserts[1] `notEqual` fail
 
 			Template:	basic/templates/service.yaml
+			DocumentIndex:	0
 			Path:	spec.type
 			Expected NOT to equal:
 				NodePort
