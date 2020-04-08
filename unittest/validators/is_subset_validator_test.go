@@ -9,20 +9,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var docToTestContains = `
+var docToTestIsSubset = `
 a:
   b:
-    - c: hello world
-    - d: foo bar
+    c: hello world
+    d: foo bar
 `
 
-func TestContainsValidatorWhenOk(t *testing.T) {
-	manifest := makeManifest(docToTestContains)
+func TestIsSubsetValidatorWhenOk(t *testing.T) {
+	manifest := makeManifest(docToTestIsSubset)
 
-	validator := ContainsValidator{
+	validator := IsSubsetValidator{
 		"a.b",
-		map[interface{}]interface{}{"d": "foo bar"},
-	}
+		map[interface{}]interface{}{"d": "foo bar"}}
+
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
 	})
@@ -31,10 +31,12 @@ func TestContainsValidatorWhenOk(t *testing.T) {
 	assert.Equal(t, []string{}, diff)
 }
 
-func TestContainsValidatorWhenNegativeAndOk(t *testing.T) {
-	manifest := makeManifest(docToTestContains)
+func TestIsSubsetValidatorWhenNegativeAndOk(t *testing.T) {
+	manifest := makeManifest(docToTestIsSubset)
 
-	validator := ContainsValidator{"a.b", map[interface{}]interface{}{"d": "hello bar"}}
+	validator := IsSubsetValidator{
+		"a.b",
+		map[interface{}]interface{}{"d": "hello bar"}}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:     []common.K8sManifest{manifest},
 		Negative: true,
@@ -44,10 +46,10 @@ func TestContainsValidatorWhenNegativeAndOk(t *testing.T) {
 	assert.Equal(t, []string{}, diff)
 }
 
-func TestContainsValidatorWhenFail(t *testing.T) {
-	manifest := makeManifest(docToTestContains)
+func TestIsSubsetValidatorWhenFail(t *testing.T) {
+	manifest := makeManifest(docToTestIsSubset)
 
-	validator := ContainsValidator{
+	validator := IsSubsetValidator{
 		"a.b",
 		map[interface{}]interface{}{"e": "bar bar"},
 	}
@@ -60,24 +62,24 @@ func TestContainsValidatorWhenFail(t *testing.T) {
 		"DocumentIndex:	0",
 		"Path:	a.b",
 		"Expected to contain:",
-		"	- e: bar bar",
+		"	e: bar bar",
 		"Actual:",
-		"	- c: hello world",
-		"	- d: foo bar",
+		"	c: hello world",
+		"	d: foo bar",
 	}, diff)
 }
 
-func TestContainsValidatorMultiManifestWhenFail(t *testing.T) {
-	manifest1 := makeManifest(docToTestContains)
+func TestIsSubsetValidatorMultiManifestWhenFail(t *testing.T) {
+	manifest1 := makeManifest(docToTestIsSubset)
 	extraDoc := `
 a:
   b:
-    - c: hello world
+    c: hello world
 `
 	manifest2 := makeManifest(extraDoc)
 	manifests := []common.K8sManifest{manifest1, manifest2}
 
-	validator := ContainsValidator{
+	validator := IsSubsetValidator{
 		"a.b",
 		map[interface{}]interface{}{"d": "foo bar"},
 	}
@@ -91,17 +93,17 @@ a:
 		"DocumentIndex:	1",
 		"Path:	a.b",
 		"Expected to contain:",
-		"	- d: foo bar",
+		"	d: foo bar",
 		"Actual:",
-		"	- c: hello world",
+		"	c: hello world",
 	}, diff)
 }
 
-func TestContainsValidatorMultiManifestWhenBothFail(t *testing.T) {
-	manifest1 := makeManifest(docToTestContains)
+func TestIsSubsetValidatorMultiManifestWhenBothFail(t *testing.T) {
+	manifest1 := makeManifest(docToTestIsSubset)
 	manifests := []common.K8sManifest{manifest1, manifest1}
 
-	validator := ContainsValidator{
+	validator := IsSubsetValidator{
 		"a.b",
 		map[interface{}]interface{}{"e": "foo bar"},
 	}
@@ -115,24 +117,24 @@ func TestContainsValidatorMultiManifestWhenBothFail(t *testing.T) {
 		"DocumentIndex:	0",
 		"Path:	a.b",
 		"Expected to contain:",
-		"	- e: foo bar",
+		"	e: foo bar",
 		"Actual:",
-		"	- c: hello world",
-		"	- d: foo bar",
+		"	c: hello world",
+		"	d: foo bar",
 		"DocumentIndex:	1",
 		"Path:	a.b",
 		"Expected to contain:",
-		"	- e: foo bar",
+		"	e: foo bar",
 		"Actual:",
-		"	- c: hello world",
-		"	- d: foo bar",
+		"	c: hello world",
+		"	d: foo bar",
 	}, diff)
 }
 
-func TestContainsValidatorWhenNegativeAndFail(t *testing.T) {
-	manifest := makeManifest(docToTestContains)
+func TestIsSubsetValidatorWhenNegativeAndFail(t *testing.T) {
+	manifest := makeManifest(docToTestIsSubset)
 
-	validator := ContainsValidator{
+	validator := IsSubsetValidator{
 		"a.b",
 		map[interface{}]interface{}{"d": "foo bar"},
 	}
@@ -146,41 +148,17 @@ func TestContainsValidatorWhenNegativeAndFail(t *testing.T) {
 		"DocumentIndex:	0",
 		"Path:	a.b",
 		"Expected NOT to contain:",
-		"	- d: foo bar",
+		"	d: foo bar",
 		"Actual:",
-		"	- c: hello world",
-		"	- d: foo bar",
-	}, diff)
-}
-
-func TestMatchContainsValidatorWhenNotAnArray(t *testing.T) {
-	manifestDocNotArray := `
-a:
-  b:
-    c: hello world
-    d: foo bar
-`
-	manifest := makeManifest(manifestDocNotArray)
-
-	validator := ContainsValidator{"a.b", common.K8sManifest{"d": "foo bar"}}
-	pass, diff := validator.Validate(&ValidateContext{
-		Docs: []common.K8sManifest{manifest},
-	})
-
-	assert.False(t, pass)
-	assert.Equal(t, []string{
-		"DocumentIndex:	0",
-		"Error:",
-		"	expect 'a.b' to be an array, got:",
 		"	c: hello world",
 		"	d: foo bar",
 	}, diff)
 }
 
-func TestContainsValidatorWhenInvalidIndex(t *testing.T) {
-	manifest := makeManifest(docToTestContains)
+func TestIsSubsetValidatorWhenInvalidIndex(t *testing.T) {
+	manifest := makeManifest(docToTestIsSubset)
 
-	validator := ContainsValidator{"a.b", common.K8sManifest{"d": "foo bar"}}
+	validator := IsSubsetValidator{"a.b", common.K8sManifest{"d": "foo bar"}}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:  []common.K8sManifest{manifest},
 		Index: 2,
@@ -193,10 +171,16 @@ func TestContainsValidatorWhenInvalidIndex(t *testing.T) {
 	}, diff)
 }
 
-func TestContainsValidatorWhenInvalidPath(t *testing.T) {
-	manifest := makeManifest(docToTestContains)
+func TestIsSubsetValidatorWhenNotAnObject(t *testing.T) {
+	manifestDocNotObject := `
+a:
+  b:
+    c: hello world
+    d: foo bar
+`
+	manifest := makeManifest(manifestDocNotObject)
 
-	validator := ContainsValidator{"a.b.e", common.K8sManifest{"d": "foo bar"}}
+	validator := IsSubsetValidator{"a.b.c", common.K8sManifest{"d": "foo bar"}}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
 	})
@@ -205,8 +189,24 @@ func TestContainsValidatorWhenInvalidPath(t *testing.T) {
 	assert.Equal(t, []string{
 		"DocumentIndex:	0",
 		"Error:",
-		"	can't get [\"e\"] from a non map type:",
-		"	- c: hello world",
-		"	- d: foo bar",
+		"	expect 'a.b.c' to be an object, got:",
+		"	hello world",
+	}, diff)
+}
+
+func TestIsSubsetValidatorWhenInvalidPath(t *testing.T) {
+	manifest := makeManifest("a::error")
+
+	validator := IsSubsetValidator{"a.b", common.K8sManifest{"d": "foo bar"}}
+	pass, diff := validator.Validate(&ValidateContext{
+		Docs: []common.K8sManifest{manifest},
+	})
+
+	assert.False(t, pass)
+	assert.Equal(t, []string{
+		"DocumentIndex:	0",
+		"Error:",
+		"	can't get [\"b\"] from a non map type:",
+		"	null",
 	}, diff)
 }
