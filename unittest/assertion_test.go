@@ -14,8 +14,12 @@ func TestAssertionUnmarshaledFromYAML(t *testing.T) {
 	assertionsYAML := `
 - equal:
 - notEqual:
+- equalRaw:
+- notEqualRaw:
 - matchRegex:
 - notMatchRegex:
+- matchRegexRaw:
+- notMatchRegexRaw:
 - contains:
 - notContains:
 - isNull:
@@ -27,9 +31,9 @@ func TestAssertionUnmarshaledFromYAML(t *testing.T) {
 - hasDocuments:
 - isSubset:
 `
-	assertionsAsMap := make([]map[string]interface{}, 14)
+	assertionsAsMap := make([]map[string]interface{}, 18)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertionsAsMap)
-	assertions := make([]Assertion, 14)
+	assertions := make([]Assertion, 18)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertions)
 
 	a := assert.New(t)
@@ -46,9 +50,17 @@ func TestAssertionUnmarshaledFromYAMLWithNotTrue(t *testing.T) {
   not: true
 - notEqual:
   not: true
+- equalRaw:
+  not: true
+- notEqualRaw:
+  not: true
 - matchRegex:
   not: true
 - notMatchRegex:
+  not: true
+- matchRegexRaw:
+  not: true
+- notMatchRegexRaw:
   not: true
 - contains:
   not: true
@@ -71,7 +83,7 @@ func TestAssertionUnmarshaledFromYAMLWithNotTrue(t *testing.T) {
 - isSubset:
   not: true
 `
-	assertions := make([]Assertion, 14)
+	assertions := make([]Assertion, 18)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertions)
 
 	a := assert.New(t)
@@ -85,9 +97,15 @@ func TestReverseAssertionTheSameAsOriginalOneWithNotTrue(t *testing.T) {
 - equal:
   not: true
 - notEqual:
+- equalRaw:
+  not: true
+- notEqualRaw:
 - matchRegex:
   not: true
 - notMatchRegex:
+- matchRegexRaw:
+  not: true
+- notMatchRegexRaw:
 - contains:
   not: true
 - notContains:
@@ -101,7 +119,7 @@ func TestReverseAssertionTheSameAsOriginalOneWithNotTrue(t *testing.T) {
   not: true
 - isNotSubset:
 `
-	assertions := make([]Assertion, 11)
+	assertions := make([]Assertion, 15)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertions)
 
 	a := assert.New(t)
@@ -188,6 +206,50 @@ e:
       f: g
 `
 	assertions := make([]Assertion, 14)
+	err := yaml.Unmarshal([]byte(assertionsYAML), &assertions)
+
+	a := assert.New(t)
+	a.Nil(err)
+
+	for idx, assertion := range assertions {
+		result := assertion.Assert(renderedMap, fakeSnapshotComparer(true), &AssertionResult{Index: idx})
+		a.Equal(&AssertionResult{
+			Index:      idx,
+			FailInfo:   []string{},
+			Passed:     true,
+			AssertType: assertion.AssertType,
+			Not:        false,
+			CustomInfo: "",
+		}, result)
+	}
+}
+
+func TestAssertionRawAssertWhenOk(t *testing.T) {
+	manifest := common.K8sManifest{common.RAW: "NOTES.txt"}
+	renderedMap := map[string][]common.K8sManifest{
+		"t.yaml": {manifest},
+	}
+
+	assertionsYAML := `
+- template: t.yaml
+  equalRaw:
+    value: NOTES.txt
+- template: t.yaml
+  notEqualRaw:
+    value: UNNOTES.txt
+- template: t.yaml
+  matchRegexRaw:
+    pattern: NOTES.txt
+- template: t.yaml
+  notMatchRegexRaw:
+    pattern: UNNOTES.txt
+- template: t.yaml
+  hasDocuments:
+    count: 1
+- template: t.yaml
+  matchSnapshot: {}
+`
+	assertions := make([]Assertion, 5)
 	err := yaml.Unmarshal([]byte(assertionsYAML), &assertions)
 
 	a := assert.New(t)
