@@ -1,3 +1,8 @@
+ FAIL  	../__fixtures__/v2/basic/tests/notes_test.yaml
+	- Execution Error: 
+		yaml: line 5: did not find expected '-' indicator
+
+
 
 ### Chart [ basic ] ../__fixtures__/v2/basic
 
@@ -8,7 +13,7 @@
 
 
 Charts:      1 passed, 1 total
-Test Suites: 3 passed, 3 total
+Test Suites: 1 failed, 1 errored, 3 passed, 4 total
 Tests:       8 passed, 8 total
 Snapshot:    1 passed, 1 total
 Time:        XX.XXXms

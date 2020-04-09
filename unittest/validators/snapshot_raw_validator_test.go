@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSnapshotValidatorWhenOk(t *testing.T) {
-	data := common.K8sManifest{"a": "b"}
-	validator := MatchSnapshotValidator{Path: "a"}
+func TestSnapshotRawValidatorWhenOk(t *testing.T) {
+	data := common.K8sManifest{common.RAW: "b"}
+	validator := MatchSnapshotRawValidator{}
 
 	mockComparer := new(mockSnapshotComparer)
 	mockComparer.On("CompareToSnapshot", "b").Return(&snapshot.CompareResult{
@@ -29,15 +29,15 @@ func TestSnapshotValidatorWhenOk(t *testing.T) {
 	mockComparer.AssertExpectations(t)
 }
 
-func TestSnapshotValidatorWhenNegativeAndOk(t *testing.T) {
-	data := common.K8sManifest{"a": "b"}
-	validator := MatchSnapshotValidator{Path: "a"}
+func TestSnapshotRawValidatorWhenNegativeAndOk(t *testing.T) {
+	data := common.K8sManifest{common.RAW: "b"}
+	validator := MatchSnapshotRawValidator{}
 
 	mockComparer := new(mockSnapshotComparer)
 	mockComparer.On("CompareToSnapshot", "b").Return(&snapshot.CompareResult{
 		Passed:         false,
-		CachedSnapshot: "a:\n  b: c\n",
-		NewSnapshot:    "x:\n  y: x\n",
+		CachedSnapshot: "b\n",
+		NewSnapshot:    "x\n",
 	})
 
 	pass, diff := validator.Validate(&ValidateContext{
@@ -52,15 +52,15 @@ func TestSnapshotValidatorWhenNegativeAndOk(t *testing.T) {
 	mockComparer.AssertExpectations(t)
 }
 
-func TestSnapshotValidatorWhenFail(t *testing.T) {
-	data := common.K8sManifest{"a": "b"}
-	validator := MatchSnapshotValidator{Path: "a"}
+func TestSnapshotRawValidatorWhenFail(t *testing.T) {
+	data := common.K8sManifest{common.RAW: "b"}
+	validator := MatchSnapshotRawValidator{}
 
 	mockComparer := new(mockSnapshotComparer)
 	mockComparer.On("CompareToSnapshot", "b").Return(&snapshot.CompareResult{
 		Passed:         false,
-		CachedSnapshot: "a:\n  b: c\n",
-		NewSnapshot:    "x:\n  y: x\n",
+		CachedSnapshot: "b\n",
+		NewSnapshot:    "x\n",
 	})
 
 	pass, diff := validator.Validate(&ValidateContext{
@@ -70,26 +70,22 @@ func TestSnapshotValidatorWhenFail(t *testing.T) {
 
 	assert.False(t, pass)
 	assert.Equal(t, []string{
-		"DocumentIndex:	0",
-		"Path:	a",
 		"Expected to match snapshot 0:",
 		"	--- Expected",
 		"	+++ Actual",
-		"	@@ -1,3 +1,3 @@",
-		"	-a:",
-		"	-  b: c",
-		"	+x:",
-		"	+  y: x",
+		"	@@ -1,2 +1,2 @@",
+		"	-b",
+		"	+x",
 	}, diff)
 
 	mockComparer.AssertExpectations(t)
 }
 
-func TestSnapshotValidatorWhenNegativeAndFail(t *testing.T) {
-	data := common.K8sManifest{"a": "b"}
-	validator := MatchSnapshotValidator{Path: "a"}
+func TestSnapshotRawValidatorWhenNegativeAndFail(t *testing.T) {
+	data := common.K8sManifest{common.RAW: "b"}
+	validator := MatchSnapshotRawValidator{}
 
-	cached := "a:\n  b: c\n"
+	cached := "b\n"
 	mockComparer := new(mockSnapshotComparer)
 	mockComparer.On("CompareToSnapshot", "b").Return(&snapshot.CompareResult{
 		Passed:         true,
@@ -105,22 +101,19 @@ func TestSnapshotValidatorWhenNegativeAndFail(t *testing.T) {
 
 	assert.False(t, pass)
 	assert.Equal(t, []string{
-		"DocumentIndex:	0",
-		"Path:	a",
 		"Expected NOT to match snapshot 0:",
-		"	a:",
-		"	  b: c",
+		"	b",
 	}, diff)
 
 	mockComparer.AssertExpectations(t)
 }
 
-func TestSnapshotValidatorWhenInvalidIndex(t *testing.T) {
-	manifest := makeManifest("a:b")
+func TestSnapshotRawValidatorWhenInvalidIndex(t *testing.T) {
+	data := common.K8sManifest{common.RAW: "b"}
 
-	validator := MatchSnapshotValidator{Path: "a"}
+	validator := MatchSnapshotRawValidator{}
 	pass, diff := validator.Validate(&ValidateContext{
-		Docs:  []common.K8sManifest{manifest},
+		Docs:  []common.K8sManifest{data},
 		Index: 2,
 	})
 
@@ -128,31 +121,5 @@ func TestSnapshotValidatorWhenInvalidIndex(t *testing.T) {
 	assert.Equal(t, []string{
 		"Error:",
 		"	documentIndex 2 out of range",
-	}, diff)
-}
-
-func TestSnapshotValidatorWhenInvalidPath(t *testing.T) {
-	manifest := makeManifest("a:b")
-
-	cached := "a:\n  b: c\n"
-	mockComparer := new(mockSnapshotComparer)
-	mockComparer.On("CompareToSnapshot", "b").Return(&snapshot.CompareResult{
-		Passed:         true,
-		CachedSnapshot: cached,
-		NewSnapshot:    cached,
-	})
-
-	validator := MatchSnapshotValidator{Path: "x.b"}
-	pass, diff := validator.Validate(&ValidateContext{
-		Docs:             []common.K8sManifest{manifest},
-		SnapshotComparer: mockComparer,
-	})
-
-	assert.False(t, pass)
-	assert.Equal(t, []string{
-		"DocumentIndex:	0",
-		"Error:",
-		"	can't get [\"b\"] from a non map type:",
-		"	null",
 	}, diff)
 }
