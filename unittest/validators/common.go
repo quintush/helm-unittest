@@ -79,6 +79,12 @@ func diff(expected string, actual string) string {
 	return diff
 }
 
+// uniform the content with correct line-endings
+func uniformContent(content string) string {
+	// All decoded content uses LF
+	return strings.ReplaceAll(content, "\r\n", "\n")
+}
+
 const errorFormat = `
 Error:
 %s
