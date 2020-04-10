@@ -14,6 +14,7 @@ type ContainsValidator struct {
 	Path    string
 	Content interface{}
 	Count   *int
+	Any     *bool
 }
 
 func (v ContainsValidator) failInfo(actual interface{}, index int, not bool) []string {
@@ -37,6 +38,33 @@ Actual:
 	)
 }
 
+func (v ContainsValidator) validateContent(actual []interface{}) (bool, int) {
+	found := false
+	validateFoundCount := 0
+
+	for _, ele := range actual {
+		// When any enabled, only the key is validated
+		if v.Any != nil && *v.Any {
+			if subset, ok := ele.(map[interface{}]interface{}); ok {
+				for key, value := range subset {
+					ele := map[interface{}]interface{}{key: value}
+					if reflect.DeepEqual(ele, v.Content) {
+						found = true
+						validateFoundCount++
+					}
+				}
+			}
+		}
+
+		if (v.Any == nil || !*v.Any) && reflect.DeepEqual(ele, v.Content) {
+			found = true
+			validateFoundCount++
+		}
+	}
+
+	return found, validateFoundCount
+}
+
 // Validate implement Validatable
 func (v ContainsValidator) Validate(context *ValidateContext) (bool, []string) {
 	manifests, err := context.getManifests()
@@ -48,7 +76,6 @@ func (v ContainsValidator) Validate(context *ValidateContext) (bool, []string) {
 	validateErrors := make([]string, 0)
 
 	for idx, manifest := range manifests {
-		validateFoundCount := 0
 		actual, err := valueutils.GetValueOfSetPath(manifest, v.Path)
 		if err != nil {
 			validateSuccess = validateSuccess && false
@@ -58,13 +85,8 @@ func (v ContainsValidator) Validate(context *ValidateContext) (bool, []string) {
 		}
 
 		if actual, ok := actual.([]interface{}); ok {
-			found := false
-			for _, ele := range actual {
-				if reflect.DeepEqual(ele, v.Content) {
-					found = true
-					validateFoundCount++
-				}
-			}
+
+			found, validateFoundCount := v.validateContent(actual)
 
 			if v.Count == nil && found == context.Negative {
 				validateSuccess = validateSuccess && false
