@@ -31,9 +31,20 @@ func TestV2ParseTestSuiteFileOk(t *testing.T) {
 	suite, err := ParseTestSuiteFile("../__fixtures__/v2/basic/tests/deployment_test.yaml", "basic")
 
 	a.Nil(err)
-	a.Equal(suite.Name, "test deployment")
-	a.Equal(suite.Templates, []string{"deployment.yaml"})
-	a.Equal(suite.Tests[0].Name, "should pass all kinds of assertion")
+	a.Equal("test deployment", suite.Name)
+	a.Equal([]string{"deployment.yaml"}, suite.Templates)
+	a.Equal("should pass all kinds of assertion", suite.Tests[0].Name)
+}
+
+func TestV2ParseTestSuiteFileInSubfolderOk(t *testing.T) {
+	a := assert.New(t)
+	suite, err := ParseTestSuiteFile("../__fixtures__/v2/with-subfolder/tests/service_test.yaml", "with-subfolder")
+
+	a.Nil(err)
+	a.Equal("test service", suite.Name)
+	a.Equal([]string{"webserver/service.yaml"}, suite.Templates)
+	a.Equal("should pass", suite.Tests[0].Name)
+	a.Equal("should render right if values given", suite.Tests[1].Name)
 }
 
 func TestV2RunSuiteWithMultipleTemplatesWhenPass(t *testing.T) {
@@ -146,6 +157,41 @@ tests:
 	a.Nil(suiteResult.ExecError)
 	a.Equal(1, len(suiteResult.TestsResult))
 	a.Equal("test suite name", suiteResult.DisplayName)
+}
+
+func TestV2RunSuiteWithSubfolderWhenPass(t *testing.T) {
+	c, _ := v2util.Load("../__fixtures__/v2/with-subfolder")
+	suiteDoc := `
+suite: test suite name
+templates:
+  - db/deployment.yaml
+  - webserver/deployment.yaml
+tests:
+  - it: should pass
+    asserts:
+      - equal:
+          path: kind
+          value: Deployment
+      - matchSnapshot: {}
+`
+	testSuite := TestSuite{}
+	yaml.Unmarshal([]byte(suiteDoc), &testSuite)
+
+	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "my_test.yaml"), false)
+	suiteResult := testSuite.RunV2(c, cache, &TestSuiteResult{})
+
+	a := assert.New(t)
+	cupaloy.SnapshotT(t, makeTestSuiteResultSnapshotable(suiteResult))
+
+	a.True(suiteResult.Passed)
+	a.Nil(suiteResult.ExecError)
+	a.Equal(1, len(suiteResult.TestsResult))
+	a.Equal("test suite name", suiteResult.DisplayName)
+
+	a.Equal(uint(2), suiteResult.SnapshotCounting.Created)
+	a.Equal(uint(2), suiteResult.SnapshotCounting.Total)
+	a.Equal(uint(0), suiteResult.SnapshotCounting.Failed)
+	a.Equal(uint(0), suiteResult.SnapshotCounting.Vanished)
 }
 
 func TestV3ParseTestSuiteFileOk(t *testing.T) {
@@ -268,4 +314,39 @@ tests:
 	a.Nil(suiteResult.ExecError)
 	a.Equal(1, len(suiteResult.TestsResult))
 	a.Equal("test suite name", suiteResult.DisplayName)
+}
+
+func TestV3RunSuiteWithSubfolderWhenPass(t *testing.T) {
+	c, _ := loader.Load("../__fixtures__/v3/with-subfolder")
+	suiteDoc := `
+suite: test suite name
+templates:
+  - db/deployment.yaml
+  - webserver/deployment.yaml
+tests:
+  - it: should pass
+    asserts:
+      - equal:
+          path: kind
+          value: Deployment
+      - matchSnapshot: {}
+`
+	testSuite := TestSuite{}
+	yaml.Unmarshal([]byte(suiteDoc), &testSuite)
+
+	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "my_test.yaml"), false)
+	suiteResult := testSuite.RunV3(c, cache, &TestSuiteResult{})
+
+	a := assert.New(t)
+	cupaloy.SnapshotT(t, makeTestSuiteResultSnapshotable(suiteResult))
+
+	a.True(suiteResult.Passed)
+	a.Nil(suiteResult.ExecError)
+	a.Equal(1, len(suiteResult.TestsResult))
+	a.Equal("test suite name", suiteResult.DisplayName)
+
+	a.Equal(uint(2), suiteResult.SnapshotCounting.Created)
+	a.Equal(uint(2), suiteResult.SnapshotCounting.Total)
+	a.Equal(uint(0), suiteResult.SnapshotCounting.Failed)
+	a.Equal(uint(0), suiteResult.SnapshotCounting.Vanished)
 }

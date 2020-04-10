@@ -36,6 +36,7 @@ func (v MatchRegexRawValidator) Validate(context *ValidateContext) (bool, []stri
 
 	for _, manifest := range manifests {
 		actual := fmt.Sprintf("%s", manifest[common.RAW])
+		actual = uniformContent(actual)
 
 		p, err := regexp.Compile(v.Pattern)
 		if err != nil {
