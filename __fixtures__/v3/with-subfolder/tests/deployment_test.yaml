@@ -6,8 +6,6 @@ tests:
   - it: should pass all kinds of assertion for both deployments
     values:
       - ./values/image.yaml
-    set:
-      service.internalPort: 8080
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
