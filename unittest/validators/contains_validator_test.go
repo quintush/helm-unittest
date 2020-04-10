@@ -25,7 +25,11 @@ func TestContainsValidatorWhenOk(t *testing.T) {
 		"a.b",
 		map[interface{}]interface{}{"d": "foo bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -46,11 +50,20 @@ a:
 `
 	manifest := makeManifest(docToTestContainsAny)
 
+<<<<<<< HEAD
+=======
+	anyValue := new(bool)
+	*anyValue = true
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	validator := ContainsValidator{
 		"a.b",
 		map[interface{}]interface{}{"name": "VALUE1"},
 		nil,
+<<<<<<< HEAD
 		true,
+=======
+		anyValue,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -71,11 +84,20 @@ a:
 `
 	manifest := makeManifest(docToTestContainsAny)
 
+<<<<<<< HEAD
+=======
+	anyValue := new(bool)
+	*anyValue = true
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	validator := ContainsValidator{
 		"a.b",
 		map[interface{}]interface{}{"name": "VALUE3"},
 		nil,
+<<<<<<< HEAD
 		true,
+=======
+		anyValue,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -102,7 +124,11 @@ func TestContainsValidatorWhenNegativeAndOk(t *testing.T) {
 		"a.b",
 		map[interface{}]interface{}{"d": "hello bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:     []common.K8sManifest{manifest},
@@ -120,7 +146,11 @@ func TestContainsValidatorWhenFail(t *testing.T) {
 		"a.b",
 		map[interface{}]interface{}{"e": "bar bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -154,7 +184,11 @@ a:
 		"a.b",
 		map[interface{}]interface{}{"d": "foo bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:  manifests,
@@ -180,7 +214,11 @@ func TestContainsValidatorMultiManifestWhenBothFail(t *testing.T) {
 		"a.b",
 		map[interface{}]interface{}{"e": "foo bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:  manifests,
@@ -217,7 +255,11 @@ func TestContainsValidatorWhenNegativeAndFail(t *testing.T) {
 		"a.b",
 		map[interface{}]interface{}{"d": "foo bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:     []common.K8sManifest{manifest},
@@ -251,7 +293,11 @@ a:
 		"a.b",
 		common.K8sManifest{"d": "foo bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -274,7 +320,11 @@ func TestContainsValidatorWhenInvalidIndex(t *testing.T) {
 		"a.b",
 		common.K8sManifest{"d": "foo bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:  []common.K8sManifest{manifest},
@@ -295,7 +345,11 @@ func TestContainsValidatorWhenInvalidPath(t *testing.T) {
 		"a.b.e",
 		common.K8sManifest{"e": "bar"},
 		nil,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -322,7 +376,11 @@ func TestContainsValidatorWhenMultipleTimesInArray(t *testing.T) {
 		"a.b",
 		map[interface{}]interface{}{"e": "bar"},
 		counter,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -341,7 +399,11 @@ func TestContainsValidatorInverseWhenNotMultipleTimesInArray(t *testing.T) {
 		"a.b",
 		map[interface{}]interface{}{"e": "bar"},
 		counter,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:     []common.K8sManifest{manifest},
@@ -361,7 +423,11 @@ func TestContainsValidatorWhenNotMultipleTimesInArray(t *testing.T) {
 		"a.b",
 		map[interface{}]interface{}{"e": "bar"},
 		counter,
+<<<<<<< HEAD
 		false,
+=======
+		nil,
+>>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
