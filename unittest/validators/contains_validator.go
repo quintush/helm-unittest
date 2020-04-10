@@ -14,7 +14,7 @@ type ContainsValidator struct {
 	Path    string
 	Content interface{}
 	Count   *int
-	Any     *bool
+	Any     bool
 }
 
 func (v ContainsValidator) failInfo(actual interface{}, index int, not bool) []string {
@@ -44,7 +44,7 @@ func (v ContainsValidator) validateContent(actual []interface{}) (bool, int) {
 
 	for _, ele := range actual {
 		// When any enabled, only the key is validated
-		if v.Any != nil && *v.Any {
+		if v.Any {
 			if subset, ok := ele.(map[interface{}]interface{}); ok {
 				for key, value := range subset {
 					ele := map[interface{}]interface{}{key: value}
@@ -56,7 +56,7 @@ func (v ContainsValidator) validateContent(actual []interface{}) (bool, int) {
 			}
 		}
 
-		if (v.Any == nil || !*v.Any) && reflect.DeepEqual(ele, v.Content) {
+		if !v.Any && reflect.DeepEqual(ele, v.Content) {
 			found = true
 			validateFoundCount++
 		}
