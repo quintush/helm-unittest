@@ -14,6 +14,8 @@ a:
   b:
     - c: hello world
     - d: foo bar
+    - e: bar
+    - e: bar
 `
 
 func TestContainsValidatorWhenOk(t *testing.T) {
@@ -22,6 +24,7 @@ func TestContainsValidatorWhenOk(t *testing.T) {
 	validator := ContainsValidator{
 		"a.b",
 		map[interface{}]interface{}{"d": "foo bar"},
+		nil,
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -34,7 +37,11 @@ func TestContainsValidatorWhenOk(t *testing.T) {
 func TestContainsValidatorWhenNegativeAndOk(t *testing.T) {
 	manifest := makeManifest(docToTestContains)
 
-	validator := ContainsValidator{"a.b", map[interface{}]interface{}{"d": "hello bar"}}
+	validator := ContainsValidator{
+		"a.b",
+		map[interface{}]interface{}{"d": "hello bar"},
+		nil,
+	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:     []common.K8sManifest{manifest},
 		Negative: true,
@@ -50,6 +57,7 @@ func TestContainsValidatorWhenFail(t *testing.T) {
 	validator := ContainsValidator{
 		"a.b",
 		map[interface{}]interface{}{"e": "bar bar"},
+		nil,
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
@@ -64,6 +72,8 @@ func TestContainsValidatorWhenFail(t *testing.T) {
 		"Actual:",
 		"	- c: hello world",
 		"	- d: foo bar",
+		"	- e: bar",
+		"	- e: bar",
 	}, diff)
 }
 
@@ -80,6 +90,7 @@ a:
 	validator := ContainsValidator{
 		"a.b",
 		map[interface{}]interface{}{"d": "foo bar"},
+		nil,
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:  manifests,
@@ -104,6 +115,7 @@ func TestContainsValidatorMultiManifestWhenBothFail(t *testing.T) {
 	validator := ContainsValidator{
 		"a.b",
 		map[interface{}]interface{}{"e": "foo bar"},
+		nil,
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:  manifests,
@@ -119,6 +131,8 @@ func TestContainsValidatorMultiManifestWhenBothFail(t *testing.T) {
 		"Actual:",
 		"	- c: hello world",
 		"	- d: foo bar",
+		"	- e: bar",
+		"	- e: bar",
 		"DocumentIndex:	1",
 		"Path:	a.b",
 		"Expected to contain:",
@@ -126,6 +140,8 @@ func TestContainsValidatorMultiManifestWhenBothFail(t *testing.T) {
 		"Actual:",
 		"	- c: hello world",
 		"	- d: foo bar",
+		"	- e: bar",
+		"	- e: bar",
 	}, diff)
 }
 
@@ -135,6 +151,7 @@ func TestContainsValidatorWhenNegativeAndFail(t *testing.T) {
 	validator := ContainsValidator{
 		"a.b",
 		map[interface{}]interface{}{"d": "foo bar"},
+		nil,
 	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:     []common.K8sManifest{manifest},
@@ -150,6 +167,8 @@ func TestContainsValidatorWhenNegativeAndFail(t *testing.T) {
 		"Actual:",
 		"	- c: hello world",
 		"	- d: foo bar",
+		"	- e: bar",
+		"	- e: bar",
 	}, diff)
 }
 
@@ -162,7 +181,11 @@ a:
 `
 	manifest := makeManifest(manifestDocNotArray)
 
-	validator := ContainsValidator{"a.b", common.K8sManifest{"d": "foo bar"}}
+	validator := ContainsValidator{
+		"a.b",
+		common.K8sManifest{"d": "foo bar"},
+		nil,
+	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
 	})
@@ -180,7 +203,11 @@ a:
 func TestContainsValidatorWhenInvalidIndex(t *testing.T) {
 	manifest := makeManifest(docToTestContains)
 
-	validator := ContainsValidator{"a.b", common.K8sManifest{"d": "foo bar"}}
+	validator := ContainsValidator{
+		"a.b",
+		common.K8sManifest{"d": "foo bar"},
+		nil,
+	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs:  []common.K8sManifest{manifest},
 		Index: 2,
@@ -196,7 +223,11 @@ func TestContainsValidatorWhenInvalidIndex(t *testing.T) {
 func TestContainsValidatorWhenInvalidPath(t *testing.T) {
 	manifest := makeManifest(docToTestContains)
 
-	validator := ContainsValidator{"a.b.e", common.K8sManifest{"d": "foo bar"}}
+	validator := ContainsValidator{
+		"a.b.e",
+		common.K8sManifest{"e": "bar"},
+		nil,
+	}
 	pass, diff := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
 	})
@@ -208,5 +239,70 @@ func TestContainsValidatorWhenInvalidPath(t *testing.T) {
 		"	can't get [\"e\"] from a non map type:",
 		"	- c: hello world",
 		"	- d: foo bar",
+		"	- e: bar",
+		"	- e: bar",
+	}, diff)
+}
+
+func TestContainsValidatorWhenMultipleTimesInArray(t *testing.T) {
+	manifest := makeManifest(docToTestContains)
+
+	counter := new(int)
+	*counter = 2
+	validator := ContainsValidator{
+		"a.b",
+		map[interface{}]interface{}{"e": "bar"},
+		counter,
+	}
+	pass, diff := validator.Validate(&ValidateContext{
+		Docs: []common.K8sManifest{manifest},
+	})
+
+	assert.True(t, pass)
+	assert.Equal(t, []string{}, diff)
+}
+
+func TestContainsValidatorInverseWhenNotMultipleTimesInArray(t *testing.T) {
+	manifest := makeManifest(docToTestContains)
+
+	counter := new(int)
+	*counter = 1
+	validator := ContainsValidator{
+		"a.b",
+		map[interface{}]interface{}{"e": "bar"},
+		counter,
+	}
+	pass, diff := validator.Validate(&ValidateContext{
+		Docs:     []common.K8sManifest{manifest},
+		Negative: true,
+	})
+
+	assert.True(t, pass)
+	assert.Equal(t, []string{}, diff)
+}
+
+func TestContainsValidatorWhenNotMultipleTimesInArray(t *testing.T) {
+	manifest := makeManifest(docToTestContains)
+
+	counter := new(int)
+	*counter = 1
+	validator := ContainsValidator{
+		"a.b",
+		map[interface{}]interface{}{"e": "bar"},
+		counter,
+	}
+	pass, diff := validator.Validate(&ValidateContext{
+		Docs: []common.K8sManifest{manifest},
+	})
+
+	assert.False(t, pass)
+	assert.Equal(t, []string{
+		"DocumentIndex:	0",
+		"Error:",
+		"	expect count 1 in 'a.b' to be in array, got 2:",
+		"	- c: hello world",
+		"	- d: foo bar",
+		"	- e: bar",
+		"	- e: bar",
 	}, diff)
 }
