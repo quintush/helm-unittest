@@ -1,7 +1,6 @@
 package validators
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/lrills/helm-unittest/unittest/common"
@@ -52,8 +51,7 @@ func (a EqualRawValidator) Validate(context *ValidateContext) (bool, []string) {
 	validateErrors := make([]string, 0)
 
 	for _, manifest := range manifests {
-		actual := fmt.Sprintf("%v", manifest[common.RAW])
-		actual = uniformContent(actual)
+		actual := uniformContent(manifest[common.RAW])
 
 		if reflect.DeepEqual(a.Value, actual) == context.Negative {
 			validateSuccess = validateSuccess && false

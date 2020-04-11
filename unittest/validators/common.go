@@ -80,9 +80,10 @@ func diff(expected string, actual string) string {
 }
 
 // uniform the content with correct line-endings
-func uniformContent(content string) string {
+func uniformContent(content interface{}) string {
 	// All decoded content uses LF
-	return strings.ReplaceAll(content, "\r\n", "\n")
+	actual := fmt.Sprintf("%v", content)
+	return strings.ReplaceAll(actual, "\r\n", "\n")
 }
 
 const errorFormat = `
