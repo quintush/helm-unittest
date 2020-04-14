@@ -14,11 +14,7 @@ type ContainsValidator struct {
 	Path    string
 	Content interface{}
 	Count   *int
-<<<<<<< HEAD
 	Any     bool
-=======
-	Any     *bool
->>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 }
 
 func (v ContainsValidator) failInfo(actual interface{}, index int, not bool) []string {
@@ -48,11 +44,7 @@ func (v ContainsValidator) validateContent(actual []interface{}) (bool, int) {
 
 	for _, ele := range actual {
 		// When any enabled, only the key is validated
-<<<<<<< HEAD
 		if v.Any {
-=======
-		if v.Any != nil && *v.Any {
->>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 			if subset, ok := ele.(map[interface{}]interface{}); ok {
 				for key, value := range subset {
 					ele := map[interface{}]interface{}{key: value}
@@ -64,11 +56,7 @@ func (v ContainsValidator) validateContent(actual []interface{}) (bool, int) {
 			}
 		}
 
-<<<<<<< HEAD
 		if !v.Any && reflect.DeepEqual(ele, v.Content) {
-=======
-		if (v.Any == nil || !*v.Any) && reflect.DeepEqual(ele, v.Content) {
->>>>>>> 48820c2... Add Any (boolean) to contains assertion to ignore the other values to be validated within an array. Added testverification and updated documentation. (#74)
 			found = true
 			validateFoundCount++
 		}
