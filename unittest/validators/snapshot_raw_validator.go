@@ -39,7 +39,7 @@ func (v MatchSnapshotRawValidator) Validate(context *ValidateContext) (bool, []s
 	validateErrors := make([]string, 0)
 
 	for _, manifest := range manifests {
-		actual := manifest[common.RAW]
+		actual := uniformContent(manifest[common.RAW])
 
 		result := context.CompareToSnapshot(actual)
 

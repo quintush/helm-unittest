@@ -1,7 +1,6 @@
 package validators
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/lrills/helm-unittest/unittest/common"
@@ -35,7 +34,7 @@ func (v MatchRegexRawValidator) Validate(context *ValidateContext) (bool, []stri
 	validateErrors := make([]string, 0)
 
 	for _, manifest := range manifests {
-		actual := fmt.Sprintf("%s", manifest[common.RAW])
+		actual := uniformContent(manifest[common.RAW])
 
 		p, err := regexp.Compile(v.Pattern)
 		if err != nil {
