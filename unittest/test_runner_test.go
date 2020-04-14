@@ -65,8 +65,9 @@ func TestV2RunnerOkWithPassedTests(t *testing.T) {
 		},
 	}
 	passed := runner.RunV2([]string{"../__fixtures__/v2/basic"})
-	assert.True(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.True(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV2RunnerOkWithFailedTests(t *testing.T) {
@@ -78,8 +79,9 @@ func TestV2RunnerOkWithFailedTests(t *testing.T) {
 		},
 	}
 	passed := runner.RunV2([]string{"../__fixtures__/v2/basic"})
-	assert.False(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.False(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV2RunnerOkWithSubSubfolder(t *testing.T) {
@@ -91,8 +93,9 @@ func TestV2RunnerOkWithSubSubfolder(t *testing.T) {
 		},
 	}
 	passed := runner.RunV2([]string{"../__fixtures__/v2/with-subfolder"})
-	assert.True(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.True(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV2RunnerWithTestsInSubchart(t *testing.T) {
@@ -105,8 +108,9 @@ func TestV2RunnerWithTestsInSubchart(t *testing.T) {
 		},
 	}
 	passed := runner.RunV2([]string{"../__fixtures__/v2/with-subchart"})
-	assert.True(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.True(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV2RunnerWithTestsInSubchartButFlagFalse(t *testing.T) {
@@ -119,8 +123,9 @@ func TestV2RunnerWithTestsInSubchartButFlagFalse(t *testing.T) {
 		},
 	}
 	passed := runner.RunV2([]string{"../__fixtures__/v2/with-subchart"})
-	assert.True(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.True(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV3RunnerOkWithPassedTests(t *testing.T) {
@@ -132,8 +137,9 @@ func TestV3RunnerOkWithPassedTests(t *testing.T) {
 		},
 	}
 	passed := runner.RunV3([]string{"../__fixtures__/v3/basic"})
-	assert.True(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.True(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV3RunnerOkWithFailedTests(t *testing.T) {
@@ -145,8 +151,9 @@ func TestV3RunnerOkWithFailedTests(t *testing.T) {
 		},
 	}
 	passed := runner.RunV3([]string{"../__fixtures__/v3/basic"})
-	assert.False(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.False(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV3RunnerOkWithSubSubfolder(t *testing.T) {
@@ -158,8 +165,9 @@ func TestV3RunnerOkWithSubSubfolder(t *testing.T) {
 		},
 	}
 	passed := runner.RunV3([]string{"../__fixtures__/v3/with-subfolder"})
-	assert.True(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.True(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV3RunnerWithTestsInSubchart(t *testing.T) {
@@ -172,8 +180,9 @@ func TestV3RunnerWithTestsInSubchart(t *testing.T) {
 		},
 	}
 	passed := runner.RunV3([]string{"../__fixtures__/v3/with-subchart"})
-	assert.True(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.True(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
 
 func TestV3RunnerWithTestsInSubchartButFlagFalse(t *testing.T) {
@@ -186,6 +195,7 @@ func TestV3RunnerWithTestsInSubchartButFlagFalse(t *testing.T) {
 		},
 	}
 	passed := runner.RunV3([]string{"../__fixtures__/v3/with-subchart"})
-	assert.True(t, passed, buffer.String())
-	cupaloy.SnapshotT(t, makeOutputSnapshotable(buffer.String())...)
+	snapshot := makeOutputSnapshotable(buffer.String())
+	assert.True(t, passed, snapshot...)
+	cupaloy.SnapshotT(t, snapshot...)
 }
