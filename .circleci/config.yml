@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   test:
     docker:
@@ -30,6 +30,7 @@ jobs:
       - run:
           name: Cleanup dependencies
           command: go mod tidy
+      - sonarcloud/scan
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
@@ -51,11 +52,14 @@ jobs:
           name: Upload binaries
           command: ghr -u $CIRCLE_USERNAME $CIRCLE_TAG _dist
 
+orbs:
+  sonarcloud: sonarsource/sonarcloud@1.0.1
+
 workflows:
-  version: 2
   test-and-build:
     jobs:
       - test:
+          context: SonarCloud
           filters:
             tags:
               only: /.*/
