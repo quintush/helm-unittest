@@ -40,6 +40,7 @@ func (v MatchSnapshotRawValidator) Validate(context *ValidateContext) (bool, []s
 
 	for _, manifest := range manifests {
 		actual := uniformContent(manifest[common.RAW])
+
 		result := context.CompareToSnapshot(actual)
 
 		if result.Passed == context.Negative {
