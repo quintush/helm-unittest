@@ -10,6 +10,32 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+func validateSucceededTestAssertions(
+	t *testing.T,
+	assertionsYAML string,
+	assertionCount int,
+	renderedMap map[string][]common.K8sManifest) {
+
+	assertions := make([]Assertion, assertionCount)
+	err := yaml.Unmarshal([]byte(assertionsYAML), &assertions)
+
+	a := assert.New(t)
+	a.Nil(err)
+
+	for idx, assertion := range assertions {
+		result := assertion.Assert(renderedMap, fakeSnapshotComparer(true), &AssertionResult{Index: idx})
+		a.Equal(&AssertionResult{
+			Index:      idx,
+			FailInfo:   []string{},
+			Passed:     true,
+			AssertType: assertion.AssertType,
+			Not:        false,
+			CustomInfo: "",
+		}, result)
+	}
+
+}
+
 func TestAssertionUnmarshaledFromYAML(t *testing.T) {
 	assertionsYAML := `
 - equal:
@@ -31,6 +57,7 @@ func TestAssertionUnmarshaledFromYAML(t *testing.T) {
 - hasDocuments:
 - isSubset:
 `
+
 	assertionsAsMap := make([]map[string]interface{}, 18)
 	yaml.Unmarshal([]byte(assertionsYAML), &assertionsAsMap)
 	assertions := make([]Assertion, 18)
@@ -205,23 +232,7 @@ e:
     content: 
       f: g
 `
-	assertions := make([]Assertion, 14)
-	err := yaml.Unmarshal([]byte(assertionsYAML), &assertions)
-
-	a := assert.New(t)
-	a.Nil(err)
-
-	for idx, assertion := range assertions {
-		result := assertion.Assert(renderedMap, fakeSnapshotComparer(true), &AssertionResult{Index: idx})
-		a.Equal(&AssertionResult{
-			Index:      idx,
-			FailInfo:   []string{},
-			Passed:     true,
-			AssertType: assertion.AssertType,
-			Not:        false,
-			CustomInfo: "",
-		}, result)
-	}
+	validateSucceededTestAssertions(t, assertionsYAML, 14, renderedMap)
 }
 
 func TestAssertionRawAssertWhenOk(t *testing.T) {
@@ -249,23 +260,7 @@ func TestAssertionRawAssertWhenOk(t *testing.T) {
 - template: t.yaml
   matchSnapshot: {}
 `
-	assertions := make([]Assertion, 5)
-	err := yaml.Unmarshal([]byte(assertionsYAML), &assertions)
-
-	a := assert.New(t)
-	a.Nil(err)
-
-	for idx, assertion := range assertions {
-		result := assertion.Assert(renderedMap, fakeSnapshotComparer(true), &AssertionResult{Index: idx})
-		a.Equal(&AssertionResult{
-			Index:      idx,
-			FailInfo:   []string{},
-			Passed:     true,
-			AssertType: assertion.AssertType,
-			Not:        false,
-			CustomInfo: "",
-		}, result)
-	}
+	validateSucceededTestAssertions(t, assertionsYAML, 5, renderedMap)
 }
 
 func TestAssertionAssertWhenTemplateNotExisted(t *testing.T) {
