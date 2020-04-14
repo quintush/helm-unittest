@@ -174,18 +174,7 @@ tests:
 	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "my_test.yaml"), false)
 	suiteResult := testSuite.RunV2(c, cache, &TestSuiteResult{})
 
-	a := assert.New(t)
-	cupaloy.SnapshotT(t, makeTestSuiteResultSnapshotable(suiteResult))
-
-	a.True(suiteResult.Passed)
-	a.Nil(suiteResult.ExecError)
-	a.Equal(1, len(suiteResult.TestsResult))
-	a.Equal("test suite name", suiteResult.DisplayName)
-
-	a.Equal(uint(2), suiteResult.SnapshotCounting.Created)
-	a.Equal(uint(2), suiteResult.SnapshotCounting.Total)
-	a.Equal(uint(0), suiteResult.SnapshotCounting.Failed)
-	a.Equal(uint(0), suiteResult.SnapshotCounting.Vanished)
+	validateTestResultAndSnapshots(t, suiteResult, true, "test suite name", 1, 2, 2, 0, 0)
 }
 
 func TestV3ParseTestSuiteFileOk(t *testing.T) {
@@ -303,16 +292,5 @@ tests:
 	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "my_test.yaml"), false)
 	suiteResult := testSuite.RunV3(c, cache, &TestSuiteResult{})
 
-	a := assert.New(t)
-	cupaloy.SnapshotT(t, makeTestSuiteResultSnapshotable(suiteResult))
-
-	a.True(suiteResult.Passed)
-	a.Nil(suiteResult.ExecError)
-	a.Equal(1, len(suiteResult.TestsResult))
-	a.Equal("test suite name", suiteResult.DisplayName)
-
-	a.Equal(uint(2), suiteResult.SnapshotCounting.Created)
-	a.Equal(uint(2), suiteResult.SnapshotCounting.Total)
-	a.Equal(uint(0), suiteResult.SnapshotCounting.Failed)
-	a.Equal(uint(0), suiteResult.SnapshotCounting.Vanished)
+	validateTestResultAndSnapshots(t, suiteResult, true, "test suite name", 1, 2, 2, 0, 0)
 }
