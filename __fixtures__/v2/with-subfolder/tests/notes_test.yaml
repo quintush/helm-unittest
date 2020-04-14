@@ -11,6 +11,7 @@ tests:
             1. Get the application URL by running these commands:
               http://chart-example.local
       - matchSnapshotRaw: {} 
+
   - it: should pass the notes file with service type NodePort
     set:
       service.type: NodePort
@@ -22,6 +23,7 @@ tests:
               export NODE_IP=$(kubectl get nodes --namespace NAMESPACE -o jsonpath="{.items[0].status.addresses[0].address}")
               echo http://$NODE_IP:$NODE_PORT
       - matchSnapshotRaw: {}
+      
   - it: should pass the notes file with service type LoadBalancer
     set:
       service.type: LoadBalancer
