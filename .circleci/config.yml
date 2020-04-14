@@ -30,7 +30,6 @@ jobs:
       - run:
           name: Cleanup dependencies
           command: go mod tidy
-      - sonarcloud/scan
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
@@ -52,14 +51,10 @@ jobs:
           name: Upload binaries
           command: ghr -u $CIRCLE_USERNAME $CIRCLE_TAG _dist
 
-orbs:
-  sonarcloud: sonarsource/sonarcloud@1.0.1
-
 workflows:
   test-and-build:
     jobs:
       - test:
-          context: SonarCloud
           filters:
             tags:
               only: /.*/
