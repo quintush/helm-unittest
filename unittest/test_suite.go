@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -36,6 +35,38 @@ func ParseTestSuiteFile(suiteFilePath, chartRoute string) (*TestSuite, error) {
 	return &suite, nil
 }
 
+const partialTemplatePrefix string = "_"
+const templatePrefix string = "templates"
+const subchartPrefix string = "charts"
+
+func findV2TemplateChart(fileName, path string, templates []*v2chart.Template) bool {
+	relativeFilePath := getTemplateFileName(fileName)
+	for _, template := range templates {
+		validateName := template.Name
+		if len(path) > 0 {
+			validateName = filepath.ToSlash(filepath.Join(path, validateName))
+		}
+		if validateName == relativeFilePath {
+			return true
+		}
+	}
+	return false
+}
+
+func findV3TemplateChart(fileName, path string, templates []*v3chart.File) bool {
+	relativeFilePath := getTemplateFileName(fileName)
+	for _, template := range templates {
+		validateName := template.Name
+		if len(path) > 0 {
+			validateName = filepath.ToSlash(filepath.Join(path, validateName))
+		}
+		if validateName == relativeFilePath {
+			return true
+		}
+	}
+	return false
+}
+
 // TestSuite defines scope and templates to render and tests to run
 type TestSuite struct {
 	Name      string `yaml:"suite"`
@@ -59,7 +90,7 @@ func (s *TestSuite) RunV2(
 	result.DisplayName = s.Name
 	result.FilePath = s.definitionFile
 
-	preparedChart, err := s.prepareV2Chart(targetChart)
+	preparedChart, err := s.validateV2Chart(targetChart)
 	if err != nil {
 		result.ExecError = err
 		return result
@@ -85,7 +116,7 @@ func (s *TestSuite) RunV3(
 	result.DisplayName = s.Name
 	result.FilePath = s.definitionFile
 
-	preparedChart, err := s.prepareV3Chart(targetChart)
+	preparedChart, err := s.validateV3Chart(targetChart)
 	if err != nil {
 		result.ExecError = err
 		return result
@@ -111,74 +142,67 @@ func (s *TestSuite) polishTestJobsPathInfo() {
 	}
 }
 
-func (s *TestSuite) prepareV2Chart(targetChart *v2chart.Chart) (*v2chart.Chart, error) {
-	copiedChart := new(v2chart.Chart)
-	*copiedChart = *targetChart
-
+func (s *TestSuite) validateV2Chart(targetChart *v2chart.Chart) (*v2chart.Chart, error) {
 	suiteIsFromRootChart := len(strings.Split(s.chartRoute, string(filepath.Separator))) <= 1
 
 	if len(s.Templates) == 0 && suiteIsFromRootChart {
-		return copiedChart, nil
+		return targetChart, nil
 	}
 
-	filteredTemplate := make([]*v2chart.Template, 0, len(s.Templates))
 	// check templates and add them in chart dependencies, if from subchart leave it empty
 	if suiteIsFromRootChart {
 		for _, fileName := range s.Templates {
-			found := false
-			for _, template := range targetChart.Templates {
-				// Within templates unix separators are always used.
-				relativeFilePath := strings.Join([]string{"templates", fileName}, "/")
-				if template.Name == relativeFilePath {
-					filteredTemplate = append(filteredTemplate, template)
-					found = true
-					break
+			found := findV2TemplateChart(fileName, "", targetChart.Templates)
+
+			// If first time not found, check if fileName is found in dependencies.
+			if !found {
+				for _, dependency := range targetChart.Dependencies {
+					chartPath := filepath.ToSlash(filepath.Join(subchartPrefix, dependency.Metadata.Name))
+					found = findV2TemplateChart(fileName, chartPath, dependency.Templates)
+					if found {
+						// If found, break out of the loop.
+						break
+					}
 				}
 			}
+
+			// Second time found, the chart is not found.
 			if !found {
 				return &v2chart.Chart{}, fmt.Errorf(
-					"template file `templates/%s` not found in chart",
-					fileName,
+					"template file `%s` not found in chart",
+					getTemplateFileName(fileName),
 				)
 			}
 		}
 	}
 
-	// add templates with extension .tpl
-	for _, template := range targetChart.Templates {
-		if path.Ext(template.Name) == ".tpl" {
-			filteredTemplate = append(filteredTemplate, template)
-		}
-	}
-	copiedChart.Templates = filteredTemplate
-
-	return copiedChart, nil
+	return targetChart, nil
 }
 
-func (s *TestSuite) prepareV3Chart(targetChart *v3chart.Chart) (*v3chart.Chart, error) {
-	copiedChart := new(v3chart.Chart)
-	*copiedChart = *targetChart
-
+func (s *TestSuite) validateV3Chart(targetChart *v3chart.Chart) (*v3chart.Chart, error) {
 	suiteIsFromRootChart := len(strings.Split(s.chartRoute, string(filepath.Separator))) <= 1
 
 	if len(s.Templates) == 0 && suiteIsFromRootChart {
-		return copiedChart, nil
+		return targetChart, nil
 	}
 
-	filteredTemplate := make([]*v3chart.File, 0, len(s.Templates))
 	// check templates and add them in chart dependencies, if from subchart leave it empty
 	if suiteIsFromRootChart {
 		for _, fileName := range s.Templates {
-			found := false
-			for _, template := range targetChart.Templates {
-				// Within templates unix separators are always used.
-				relativeFilePath := strings.Join([]string{"templates", fileName}, "/")
-				if template.Name == relativeFilePath {
-					filteredTemplate = append(filteredTemplate, template)
-					found = true
-					break
+			found := findV3TemplateChart(fileName, "", targetChart.Templates)
+
+			// If first time not found, check if fileName is found in dependencies.
+			if !found {
+				for _, dependency := range targetChart.Dependencies() {
+					chartPath := filepath.ToSlash(filepath.Join(subchartPrefix, dependency.Metadata.Name))
+					found = findV3TemplateChart(fileName, chartPath, dependency.Templates)
+					if found {
+						// If found, break out of the loop.
+						break
+					}
 				}
 			}
+
 			if !found {
 				return &v3chart.Chart{}, fmt.Errorf(
 					"template file `templates/%s` not found in chart",
@@ -188,15 +212,7 @@ func (s *TestSuite) prepareV3Chart(targetChart *v3chart.Chart) (*v3chart.Chart, 
 		}
 	}
 
-	// add templates with extension .tpl
-	for _, template := range targetChart.Templates {
-		if path.Ext(template.Name) == ".tpl" {
-			filteredTemplate = append(filteredTemplate, template)
-		}
-	}
-	copiedChart.Templates = filteredTemplate
-
-	return copiedChart, nil
+	return targetChart, nil
 }
 
 func (s *TestSuite) runV2TestJobs(

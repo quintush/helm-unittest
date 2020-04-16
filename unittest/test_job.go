@@ -346,7 +346,7 @@ func (t *TestJob) polishAssertionsTemplate(targetChartName string) {
 		// map the file name to the path of helm rendered result
 		templatesPath := make([]string, 0)
 		for _, template := range templatesToAssert {
-			templatePath := filepath.ToSlash(filepath.Join(t.chartRoute, "templates", template))
+			templatePath := filepath.ToSlash(filepath.Join(t.chartRoute, getTemplateFileName(template)))
 			templatesPath = append(templatesPath, templatePath)
 		}
 		assertion.defaultTemplates = templatesPath

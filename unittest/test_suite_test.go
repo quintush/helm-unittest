@@ -177,6 +177,29 @@ tests:
 	validateTestResultAndSnapshots(t, suiteResult, true, "test suite name", 1, 2, 2, 0, 0)
 }
 
+func TestV2RunSuiteWithSubChartsWhenPass(t *testing.T) {
+	c, _ := v2util.Load(testV2WithSubChart)
+	suiteDoc := `
+suite: test suite with subchart
+templates:
+  - charts/postgresql/templates/deployment.yaml
+tests:
+  - it: should pass
+    asserts:
+      - equal:
+          path: kind
+          value: Deployment
+      - matchSnapshot: {}
+`
+	testSuite := TestSuite{}
+	yaml.Unmarshal([]byte(suiteDoc), &testSuite)
+
+	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "v2_subchart_test.yaml"), false)
+	suiteResult := testSuite.RunV2(c, cache, &TestSuiteResult{})
+
+	validateTestResultAndSnapshots(t, suiteResult, true, "test suite with subchart", 1, 1, 1, 0, 0)
+}
+
 func TestV3ParseTestSuiteFileOk(t *testing.T) {
 	a := assert.New(t)
 	suite, err := ParseTestSuiteFile("../__fixtures__/v3/basic/tests/deployment_test.yaml", "basic")
@@ -293,4 +316,27 @@ tests:
 	suiteResult := testSuite.RunV3(c, cache, &TestSuiteResult{})
 
 	validateTestResultAndSnapshots(t, suiteResult, true, "test suite name", 1, 2, 2, 0, 0)
+}
+
+func TestV3RunSuiteWithSubChartsWhenPass(t *testing.T) {
+	c, _ := loader.Load(testV3WithSubChart)
+	suiteDoc := `
+suite: test suite with subchart
+templates:
+  - charts/postgresql/templates/deployment.yaml
+tests:
+  - it: should pass
+    asserts:
+      - equal:
+          path: kind
+          value: Deployment
+      - matchSnapshot: {}
+`
+	testSuite := TestSuite{}
+	yaml.Unmarshal([]byte(suiteDoc), &testSuite)
+
+	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "v3_subchart_test.yaml"), false)
+	suiteResult := testSuite.RunV3(c, cache, &TestSuiteResult{})
+
+	validateTestResultAndSnapshots(t, suiteResult, true, "test suite with subchart", 1, 1, 1, 0, 0)
 }
