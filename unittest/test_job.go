@@ -16,7 +16,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 
 	v3chart "helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chartutil"
 	v3util "helm.sh/helm/v3/pkg/chartutil"
 	v3engine "helm.sh/helm/v3/pkg/engine"
 	v2util "k8s.io/helm/pkg/chartutil"
@@ -199,7 +198,7 @@ func (t *TestJob) renderV3Chart(targetChart *v3chart.Chart, userValues []byte) (
 	}
 	options := *t.releaseV3Option()
 
-	err = chartutil.ProcessDependencies(targetChart, values)
+	err = v3util.ProcessDependencies(targetChart, values)
 	if err != nil {
 		return nil, err
 	}
