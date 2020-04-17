@@ -16,13 +16,13 @@ import (
 	yaml "gopkg.in/yaml.v2"
 
 	v3chart "helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chartutil"
 	v3util "helm.sh/helm/v3/pkg/chartutil"
 	v3engine "helm.sh/helm/v3/pkg/engine"
 	v2util "k8s.io/helm/pkg/chartutil"
-	v2engine "k8s.io/helm/pkg/engine"
 	v2chart "k8s.io/helm/pkg/proto/hapi/chart"
+	v2renderutil "k8s.io/helm/pkg/renderutil"
 	v2timeconv "k8s.io/helm/pkg/timeconv"
-	v2version "k8s.io/helm/pkg/version"
 )
 
 type orderedSnapshotComparer struct {
@@ -174,20 +174,14 @@ func (t *TestJob) getUserValues() ([]byte, error) {
 // render the chart and return result map
 func (t *TestJob) renderV2Chart(targetChart *v2chart.Chart, userValues []byte) (map[string]string, error) {
 	config := &v2chart.Config{Raw: string(userValues)}
-	options := *t.releaseV2Option()
-	caps := &v2util.Capabilities{
-		APIVersions:   v2util.DefaultVersionSet,
-		KubeVersion:   v2util.DefaultKubeVersion,
-		TillerVersion: v2version.GetVersionProto(),
+	defaultKubeVersion := fmt.Sprintf("%s.%s", v2util.DefaultKubeVersion.Major, v2util.DefaultKubeVersion.Minor)
+	renderOpts := v2renderutil.Options{
+		ReleaseOptions: *t.releaseV2Option(),
+		KubeVersion:    defaultKubeVersion,
+		APIVersions:    []string{},
 	}
 
-	vals, err := v2util.ToRenderValuesCaps(targetChart, config, options, caps)
-	if err != nil {
-		return nil, err
-	}
-
-	renderer := v2engine.New()
-	outputOfFiles, err := renderer.Render(targetChart, vals)
+	outputOfFiles, err := v2renderutil.Render(targetChart, config, renderOpts)
 	// TODO: When rendering failed, due to fail or required,
 	// make sure to translate the error to outputOfFiles.
 	if err != nil {
@@ -204,6 +198,11 @@ func (t *TestJob) renderV3Chart(targetChart *v3chart.Chart, userValues []byte) (
 		return nil, err
 	}
 	options := *t.releaseV3Option()
+
+	err = chartutil.ProcessDependencies(targetChart, values)
+	if err != nil {
+		return nil, err
+	}
 
 	vals, err := v3util.ToRenderValues(targetChart, values.AsMap(), options, v3util.DefaultCapabilities)
 	if err != nil {

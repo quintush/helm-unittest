@@ -182,7 +182,7 @@ func TestV2RunSuiteWithSubChartsWhenPass(t *testing.T) {
 	suiteDoc := `
 suite: test suite with subchart
 templates:
-  - charts/postgresql/templates/deployment.yaml
+  - charts/postgresql/templates/deployment.yaml 
 tests:
   - it: should pass
     asserts:
@@ -198,6 +198,37 @@ tests:
 	suiteResult := testSuite.RunV2(c, cache, &TestSuiteResult{})
 
 	validateTestResultAndSnapshots(t, suiteResult, true, "test suite with subchart", 1, 1, 1, 0, 0)
+}
+
+func TestV2RunSuiteWithSubChartsWithAliasWhenPass(t *testing.T) {
+	c, _ := v2util.Load(testV2WithSubChart)
+	suiteDoc := `
+suite: test suite with subchart
+templates:
+  - charts/postgresql/templates/pvc.yaml 
+  - charts/another-postgresql/templates/pvc.yaml
+tests:
+  - it: should both pass
+    asserts:
+      - equal:
+          path: kind
+          value: PersistentVolumeClaim
+      - matchSnapshot: {}
+  - it: should no pvc for alias
+    set:
+      another-postgresql.persistence.enabled: false
+    template: charts/another-postgresql/templates/pvc.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+`
+	testSuite := TestSuite{}
+	yaml.Unmarshal([]byte(suiteDoc), &testSuite)
+
+	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "v2_subchartwithalias_test.yaml"), false)
+	suiteResult := testSuite.RunV2(c, cache, &TestSuiteResult{})
+
+	validateTestResultAndSnapshots(t, suiteResult, true, "test suite with subchart", 2, 2, 2, 0, 0)
 }
 
 func TestV3ParseTestSuiteFileOk(t *testing.T) {
@@ -339,4 +370,35 @@ tests:
 	suiteResult := testSuite.RunV3(c, cache, &TestSuiteResult{})
 
 	validateTestResultAndSnapshots(t, suiteResult, true, "test suite with subchart", 1, 1, 1, 0, 0)
+}
+
+func TestV3RunSuiteWithSubChartsWithAliasWhenPass(t *testing.T) {
+	c, _ := loader.Load(testV2WithSubChart)
+	suiteDoc := `
+suite: test suite with subchart
+templates:
+  - charts/postgresql/templates/pvc.yaml 
+  - charts/another-postgresql/templates/pvc.yaml
+tests:
+  - it: should both pass
+    asserts:
+      - equal:
+          path: kind
+          value: PersistentVolumeClaim
+      - matchSnapshot: {}
+  - it: should no pvc for alias
+    set:
+      another-postgresql.persistence.enabled: false
+    template: charts/another-postgresql/templates/pvc.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+`
+	testSuite := TestSuite{}
+	yaml.Unmarshal([]byte(suiteDoc), &testSuite)
+
+	cache, _ := snapshot.CreateSnapshotOfSuite(path.Join(tmpdir, "v3_subchartwithalias_test.yaml"), false)
+	suiteResult := testSuite.RunV3(c, cache, &TestSuiteResult{})
+
+	validateTestResultAndSnapshots(t, suiteResult, true, "test suite with subchart", 2, 2, 2, 0, 0)
 }
