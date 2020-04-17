@@ -1,11 +1,9 @@
 package unittest
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/lrills/helm-unittest/unittest/snapshot"
 	"gopkg.in/yaml.v2"
@@ -35,38 +33,6 @@ func ParseTestSuiteFile(suiteFilePath, chartRoute string) (*TestSuite, error) {
 	return &suite, nil
 }
 
-const partialTemplatePrefix string = "_"
-const templatePrefix string = "templates"
-const subchartPrefix string = "charts"
-
-func findV2TemplateChart(fileName, path string, templates []*v2chart.Template) bool {
-	relativeFilePath := getTemplateFileName(fileName)
-	for _, template := range templates {
-		validateName := template.Name
-		if len(path) > 0 {
-			validateName = filepath.ToSlash(filepath.Join(path, validateName))
-		}
-		if validateName == relativeFilePath {
-			return true
-		}
-	}
-	return false
-}
-
-func findV3TemplateChart(fileName, path string, templates []*v3chart.File) bool {
-	relativeFilePath := getTemplateFileName(fileName)
-	for _, template := range templates {
-		validateName := template.Name
-		if len(path) > 0 {
-			validateName = filepath.ToSlash(filepath.Join(path, validateName))
-		}
-		if validateName == relativeFilePath {
-			return true
-		}
-	}
-	return false
-}
-
 // TestSuite defines scope and templates to render and tests to run
 type TestSuite struct {
 	Name      string `yaml:"suite"`
@@ -90,14 +56,8 @@ func (s *TestSuite) RunV2(
 	result.DisplayName = s.Name
 	result.FilePath = s.definitionFile
 
-	preparedChart, err := s.validateV2Chart(targetChart)
-	if err != nil {
-		result.ExecError = err
-		return result
-	}
-
 	result.Passed, result.TestsResult = s.runV2TestJobs(
-		preparedChart,
+		targetChart,
 		snapshotCache,
 	)
 
@@ -116,14 +76,8 @@ func (s *TestSuite) RunV3(
 	result.DisplayName = s.Name
 	result.FilePath = s.definitionFile
 
-	preparedChart, err := s.validateV3Chart(targetChart)
-	if err != nil {
-		result.ExecError = err
-		return result
-	}
-
 	result.Passed, result.TestsResult = s.runV3TestJobs(
-		preparedChart,
+		targetChart,
 		snapshotCache,
 	)
 
@@ -140,79 +94,6 @@ func (s *TestSuite) polishTestJobsPathInfo() {
 			test.defaultTemplatesToAssert = s.Templates
 		}
 	}
-}
-
-func (s *TestSuite) validateV2Chart(targetChart *v2chart.Chart) (*v2chart.Chart, error) {
-	suiteIsFromRootChart := len(strings.Split(s.chartRoute, string(filepath.Separator))) <= 1
-
-	if len(s.Templates) == 0 && suiteIsFromRootChart {
-		return targetChart, nil
-	}
-
-	// check templates and add them in chart dependencies, if from subchart leave it empty
-	if suiteIsFromRootChart {
-		for _, fileName := range s.Templates {
-			found := findV2TemplateChart(fileName, "", targetChart.Templates)
-
-			// If first time not found, check if fileName is found in dependencies.
-			if !found {
-				for _, dependency := range targetChart.Dependencies {
-					chartPath := filepath.ToSlash(filepath.Join(subchartPrefix, dependency.Metadata.Name))
-					found = findV2TemplateChart(fileName, chartPath, dependency.Templates)
-					if found {
-						// If found, break out of the loop.
-						break
-					}
-				}
-			}
-
-			// Second time found, the chart is not found.
-			if !found {
-				return &v2chart.Chart{}, fmt.Errorf(
-					"template file `%s` not found in chart",
-					getTemplateFileName(fileName),
-				)
-			}
-		}
-	}
-
-	return targetChart, nil
-}
-
-func (s *TestSuite) validateV3Chart(targetChart *v3chart.Chart) (*v3chart.Chart, error) {
-	suiteIsFromRootChart := len(strings.Split(s.chartRoute, string(filepath.Separator))) <= 1
-
-	if len(s.Templates) == 0 && suiteIsFromRootChart {
-		return targetChart, nil
-	}
-
-	// check templates and add them in chart dependencies, if from subchart leave it empty
-	if suiteIsFromRootChart {
-		for _, fileName := range s.Templates {
-			found := findV3TemplateChart(fileName, "", targetChart.Templates)
-
-			// If first time not found, check if fileName is found in dependencies.
-			if !found {
-				for _, dependency := range targetChart.Dependencies() {
-					chartPath := filepath.ToSlash(filepath.Join(subchartPrefix, dependency.Metadata.Name))
-					found = findV3TemplateChart(fileName, chartPath, dependency.Templates)
-					if found {
-						// If found, break out of the loop.
-						break
-					}
-				}
-			}
-
-			if !found {
-				return &v3chart.Chart{}, fmt.Errorf(
-					"template file `templates/%s` not found in chart",
-					fileName,
-				)
-			}
-		}
-	}
-
-	return targetChart, nil
 }
 
 func (s *TestSuite) runV2TestJobs(

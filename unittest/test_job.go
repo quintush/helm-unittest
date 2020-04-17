@@ -188,6 +188,8 @@ func (t *TestJob) renderV2Chart(targetChart *v2chart.Chart, userValues []byte) (
 
 	renderer := v2engine.New()
 	outputOfFiles, err := renderer.Render(targetChart, vals)
+	// TODO: When rendering failed, due to fail or required,
+	// make sure to translate the error to outputOfFiles.
 	if err != nil {
 		return nil, err
 	}

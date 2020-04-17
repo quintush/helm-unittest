@@ -10,6 +10,9 @@ import (
 // TestFramework the default name of the test framework.
 const TestFramework = "helm-unittest"
 
+const templatePrefix string = "templates"
+const subchartPrefix string = "charts"
+
 // getTemplateFileName,
 // Validate if prefix templates is not there,
 // used for backward compatibility of old unittests.
