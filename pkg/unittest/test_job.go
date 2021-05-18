@@ -424,6 +424,14 @@ func (t *TestJob) renderV3Chart(targetChart *v3chart.Chart, userValues []byte) (
 	}
 	options := *t.releaseV3Option()
 
+	//Check Release Name lenght
+	if t.Release.Name != "" {
+		err = v3util.ValidateReleaseName(t.Release.Name)
+		if err != nil {
+			return nil, false, err
+		}
+	}
+
 	// Override the chart version when version is setup in test.
 	if t.Chart.Version != "" {
 		targetChart.Metadata.Version = t.Chart.Version
