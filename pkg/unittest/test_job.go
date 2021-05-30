@@ -156,6 +156,7 @@ func (s *orderedSnapshotComparer) CompareToSnapshot(content interface{}) *snapsh
 type TestJob struct {
 	Name          string `yaml:"it"`
 	Values        []string
+	ShouldFail    bool `yaml:"should_fail"`
 	Set           map[string]interface{}
 	Template      string
 	Templates     []string
@@ -210,7 +211,11 @@ func (t *TestJob) RunV2(
 
 	manifestsOfFiles, err := t.parseManifestsFromOutputOfFiles(outputOfFiles)
 	if err != nil {
-		result.ExecError = err
+		if t.ShouldFail == true {
+			result.Passed = true
+		} else {
+			result.ExecError = err
+		}
 		return result
 	}
 
@@ -221,6 +226,10 @@ func (t *TestJob) RunV2(
 		renderSucceed,
 		failfast,
 	)
+
+	if !result.Passed && t.ShouldFail == true {
+		result.Passed = true
+	}
 
 	result.Duration = time.Since(startTestRun)
 	return result
@@ -236,16 +245,18 @@ func (t *TestJob) RunV3(
 	startTestRun := time.Now()
 	t.polishAssertionsTemplate(targetChart.Name())
 	result.DisplayName = t.Name
-
 	userValues, err := t.getUserValues()
 	if err != nil {
 		result.ExecError = err
 		return result
 	}
-
 	outputOfFiles, renderSucceed, err := t.renderV3Chart(targetChart, userValues)
 	if err != nil {
-		result.ExecError = err
+		if t.ShouldFail == true {
+			result.Passed = true
+		} else {
+			result.ExecError = err
+		}
 		return result
 	}
 
@@ -262,6 +273,10 @@ func (t *TestJob) RunV3(
 		renderSucceed,
 		failfast,
 	)
+
+	if !result.Passed && t.ShouldFail == true {
+		result.Passed = true
+	}
 
 	result.Duration = time.Since(startTestRun)
 	return result

@@ -1,5 +1,6 @@
 /.vs
 /.vscode
+.idea
 
 _scratch
 tpl
