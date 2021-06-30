@@ -3,8 +3,8 @@ package validators
 import (
 	"strconv"
 
-	"github.com/lrills/helm-unittest/internal/common"
-	"github.com/lrills/helm-unittest/pkg/unittest/snapshot"
+	"github.com/quintush/helm-unittest/internal/common"
+	"github.com/quintush/helm-unittest/pkg/unittest/snapshot"
 )
 
 // MatchSnapshotRawValidator validate snapshot of value of Path the same as cached

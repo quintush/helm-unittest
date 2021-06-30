@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/lrills/helm-unittest/internal/common"
-	"github.com/lrills/helm-unittest/pkg/unittest/valueutils"
+	"github.com/quintush/helm-unittest/internal/common"
+	"github.com/quintush/helm-unittest/pkg/unittest/valueutils"
 )
 
 // MatchRegexValidator validate value of Path match Pattern

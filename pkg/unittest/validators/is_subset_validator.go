@@ -3,8 +3,8 @@ package validators
 import (
 	"fmt"
 
-	"github.com/lrills/helm-unittest/internal/common"
-	"github.com/lrills/helm-unittest/pkg/unittest/valueutils"
+	"github.com/quintush/helm-unittest/internal/common"
+	"github.com/quintush/helm-unittest/pkg/unittest/valueutils"
 	yaml "gopkg.in/yaml.v2"
 )
 

@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lrills/helm-unittest/internal/common"
-	"github.com/lrills/helm-unittest/pkg/unittest/results"
-	"github.com/lrills/helm-unittest/pkg/unittest/snapshot"
-	"github.com/lrills/helm-unittest/pkg/unittest/validators"
-	"github.com/lrills/helm-unittest/pkg/unittest/valueutils"
+	"github.com/quintush/helm-unittest/internal/common"
+	"github.com/quintush/helm-unittest/pkg/unittest/results"
+	"github.com/quintush/helm-unittest/pkg/unittest/snapshot"
+	"github.com/quintush/helm-unittest/pkg/unittest/validators"
+	"github.com/quintush/helm-unittest/pkg/unittest/valueutils"
 
 	yaml "gopkg.in/yaml.v2"
 

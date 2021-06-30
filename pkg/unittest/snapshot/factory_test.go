@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/lrills/helm-unittest/pkg/unittest/snapshot"
+	. "github.com/quintush/helm-unittest/pkg/unittest/snapshot"
 	"github.com/stretchr/testify/assert"
 )
 
