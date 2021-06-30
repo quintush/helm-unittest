@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/lrills/helm-unittest/internal/common"
+	"github.com/quintush/helm-unittest/internal/common"
 )
 
 // FailedTemplateValidator validate whether the errorMessage equal to errorMessage

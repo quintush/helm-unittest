@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/lrills/helm-unittest/internal/printer"
-	"github.com/lrills/helm-unittest/pkg/unittest/formatter"
-	"github.com/lrills/helm-unittest/pkg/unittest/results"
-	"github.com/lrills/helm-unittest/pkg/unittest/snapshot"
+	"github.com/quintush/helm-unittest/internal/printer"
+	"github.com/quintush/helm-unittest/pkg/unittest/formatter"
+	"github.com/quintush/helm-unittest/pkg/unittest/results"
+	"github.com/quintush/helm-unittest/pkg/unittest/snapshot"
 
 	v3chart "helm.sh/helm/v3/pkg/chart"
 	v3loader "helm.sh/helm/v3/pkg/chart/loader"

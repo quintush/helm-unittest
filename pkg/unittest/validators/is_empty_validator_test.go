@@ -3,8 +3,8 @@ package validators_test
 import (
 	"testing"
 
-	"github.com/lrills/helm-unittest/internal/common"
-	. "github.com/lrills/helm-unittest/pkg/unittest/validators"
+	"github.com/quintush/helm-unittest/internal/common"
+	. "github.com/quintush/helm-unittest/pkg/unittest/validators"
 	"github.com/stretchr/testify/assert"
 	yaml "gopkg.in/yaml.v2"
 )

@@ -3,10 +3,10 @@ package unittest_test
 import (
 	"testing"
 
-	"github.com/lrills/helm-unittest/internal/common"
-	. "github.com/lrills/helm-unittest/pkg/unittest"
-	"github.com/lrills/helm-unittest/pkg/unittest/results"
-	"github.com/lrills/helm-unittest/pkg/unittest/snapshot"
+	"github.com/quintush/helm-unittest/internal/common"
+	. "github.com/quintush/helm-unittest/pkg/unittest"
+	"github.com/quintush/helm-unittest/pkg/unittest/results"
+	"github.com/quintush/helm-unittest/pkg/unittest/snapshot"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )

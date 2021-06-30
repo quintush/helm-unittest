@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/lrills/helm-unittest/pkg/unittest/results"
+	"github.com/quintush/helm-unittest/pkg/unittest/results"
 )
 
 // XUnitValidationMethod the default name for Helm XUnit validation.

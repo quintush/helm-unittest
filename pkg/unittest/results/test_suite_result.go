@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/lrills/helm-unittest/internal/printer"
-	"github.com/lrills/helm-unittest/pkg/unittest/snapshot"
+	"github.com/quintush/helm-unittest/internal/printer"
+	"github.com/quintush/helm-unittest/pkg/unittest/snapshot"
 )
 
 // TestSuiteResult result return by TestSuite.Run

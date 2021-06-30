@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/lrills/helm-unittest/internal/printer"
-	"github.com/lrills/helm-unittest/pkg/unittest"
-	"github.com/lrills/helm-unittest/pkg/unittest/formatter"
+	"github.com/quintush/helm-unittest/internal/printer"
+	"github.com/quintush/helm-unittest/pkg/unittest"
+	"github.com/quintush/helm-unittest/pkg/unittest/formatter"
 	"github.com/spf13/cobra"
 )
 

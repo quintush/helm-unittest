@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"io"
 
-	"github.com/lrills/helm-unittest/pkg/unittest/results"
+	"github.com/quintush/helm-unittest/pkg/unittest/results"
 )
 
 // JUnitTestSuites is a collection of JUnit test suites.

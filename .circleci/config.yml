@@ -3,7 +3,7 @@ jobs:
   test:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/lrills/helm-unittest
+    working_directory: /go/src/github.com/quintush/helm-unittest
     steps:
       - checkout
       - run:
@@ -34,7 +34,7 @@ jobs:
   distribute:
     docker:
       - image: golang:1.14
-    working_directory: /go/src/github.com/lrills/helm-unittest
+    working_directory: /go/src/github.com/quintush/helm-unittest
     steps:
       - checkout
       - run:
@@ -50,7 +50,7 @@ jobs:
   distribute_docker:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/lrills/helm-unittest
+    working_directory: /go/src/github.com/quintush/helm-unittest
     steps:
       - checkout
       - setup_remote_docker
