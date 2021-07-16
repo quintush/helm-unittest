@@ -1,7 +1,9 @@
 package validators
 
 import (
+        "fmt"
 	"reflect"
+        "regexp"
 
 	"github.com/lrills/helm-unittest/internal/common"
 	"github.com/lrills/helm-unittest/pkg/unittest/valueutils"
@@ -53,6 +55,14 @@ func (a EqualValidator) Validate(context *ValidateContext) (bool, []string) {
 			errorMessage := splitInfof(errorFormat, idx, err.Error())
 			validateErrors = append(validateErrors, errorMessage...)
 			continue
+		}
+
+
+		_, ok := actual.(string)
+		if ok {
+			re := regexp.MustCompile(`(?m)[ ]+\n`)
+			substitution := "\n"
+			actual = re.ReplaceAllString(fmt.Sprintf("%v", actual), substitution)
 		}
 
 		if reflect.DeepEqual(a.Value, actual) == context.Negative {
