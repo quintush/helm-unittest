@@ -14,6 +14,7 @@ import (
 // testOptions stores options setup by user in command line
 type testOptions struct {
 	useHelmV3      bool
+	useHelmV2      bool
 	useFailfast    bool
 	useStrict      bool
 	colored        bool
@@ -83,7 +84,7 @@ details about how to write tests.
 		}
 		var passed bool
 
-		if !testConfig.useHelmV3 {
+		if testConfig.useHelmV2 {
 			passed = runner.RunV2(chartPaths)
 		} else {
 			passed = runner.RunV3(chartPaths)
@@ -146,8 +147,13 @@ func init() {
 	)
 
 	cmd.PersistentFlags().BoolVarP(
-		&testConfig.useHelmV3, "helm3", "3", false,
-		"parse helm charts as helm3 charts",
+		&testConfig.useHelmV3, "helm3", "3", true,
+		"parse as helm3 charts",
+	)
+
+	cmd.PersistentFlags().BoolVarP(
+		&testConfig.useHelmV2, "helm2", "2", false,
+		"parse as helm2 charts",
 	)
 
 	cmd.PersistentFlags().BoolVarP(
