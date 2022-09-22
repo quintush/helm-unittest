@@ -3,7 +3,7 @@
 # borrowed from https://github.com/technosophos/helm-template
 
 PROJECT_NAME="helm-unittest"
-PROJECT_GH="meetings-web-tools/$PROJECT_NAME"
+PROJECT_GH="jeantsai/$PROJECT_NAME"
 PROJECT_CHECKSUM_FILE="$PROJECT_NAME-checksum.sha"
 
 : "${HELM_PLUGIN_PATH:="$HELM_PLUGIN_DIR"}"
@@ -69,11 +69,11 @@ verifySupported() {
 # getDownloadURL checks the latest available version.
 getDownloadURL() {
   # Use the GitHub API to find the latest version for this project.
-  local latest_url="https://sqbu-github.cisco.com/repos/$PROJECT_GH/releases/latest"
+  local latest_url="https://github.com/repos/$PROJECT_GH/releases/latest"
   if [[ -z $HELM_PLUGIN_UPDATE ]]; then
     local version=$(git describe --tags --exact-match 2>/dev/null)
     if [ -n "$version" ]; then
-      latest_url="https://sqbu-github.cisco.com/repos/$PROJECT_GH/releases/tags/$version"
+      latest_url="https://github.com/repos/$PROJECT_GH/releases/tags/$version"
     fi
   fi
   echo "Retrieving $latest_url"
