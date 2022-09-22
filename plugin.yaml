@@ -1,6 +1,6 @@
-name: "unittest"
+name: "ut"
 version: "0.2.8"
-usage: "unittest for helm charts"
+usage: "unittest for helm charts using jsonpath"
 description: "Unit test for helm chart in YAML with ease to keep your chart functional and robust."
 ignoreFlags: false
 command: "$HELM_PLUGIN_DIR/untt"
