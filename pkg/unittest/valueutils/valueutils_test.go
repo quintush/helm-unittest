@@ -15,17 +15,18 @@ func TestGetValueOfSetPath(t *testing.T) {
 			"b":   []interface{}{"_", map[interface{}]interface{}{"c": "yes"}},
 			"d":   "no",
 			"e.f": "false",
-			"g":   map[interface{}]interface{}{"h": "\"quotes\""},
+			"g":    map[interface{}]interface{}{"h": "\"quotes\""},
 		},
 	}
 
 	var expectionsMapping = map[string]interface{}{
-		"a.b[1].c": "yes",
-		"a.b[0]":   "_",
-		"a.b":      []interface{}{"_", map[interface{}]interface{}{"c": "yes"}},
-		"a.[d]":    "no",
-		"a.[e.f]":  "false",
-		"a.g.h":    "\"quotes\"",
+		"a.b[1].c":    "yes",
+		"a.b[0]":      "_",
+		"a.b":         []interface{}{"_", map[interface{}]interface{}{"c": "yes"}},
+		"a['d']":      "no",
+		"a[\"e.f\"]":  "false",
+		"a.g.h":       "\"quotes\"",
+		"a.x":         nil,
 	}
 
 	for path, expect := range expectionsMapping {
@@ -45,11 +46,13 @@ func TestGetValueOfSetPathError(t *testing.T) {
 	}
 
 	var expectionsMapping = map[string]string{
-		"a.b[0].c": "can't get [\"c\"] from a non map type:\n_\n",
-		"a[0]":     "can't get [0] from a non array type:\nb:\n- _\nc.d: \"no\"\n",
-		",":        "Invalid token found ,",
-		"a.b[0[]]": "Missing index value",
-		"a.[c[0]]": "Invalid escaping token [",
+		// "a.b[0].c": "unknown parameter a.b.0.c",
+		// // "a[0]":     "can't get [0] from a non array type:\nb:\n- _\nc.d: \"no\"\n",
+		// ",":        "parsing error: ,\t:1:1 - 1:2 unexpected \",\" while scanning extensions",
+		// "a.b[0[]]": "parsing error: a.b[0[]]\t:1:6 - 1:7 unexpected \"[\" while scanning array key expected \"]\"",
+		// "a[c[0]]":  "unknown parameter c",
+		// "x":           "unknown parameter x",
+		// "x.x":         "unknown parameter x",
 	}
 
 	for path, expect := range expectionsMapping {

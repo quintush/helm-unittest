@@ -187,9 +187,17 @@ func TestEqualValidatorWhenWrongPath(t *testing.T) {
 	assert.False(t, pass)
 	assert.Equal(t, []string{
 		"DocumentIndex:	0",
-		"Error:",
-		"	can't get [\"e\"] from a non map type:",
-		"	- c: 123",
+		"Path:	a.b.e",
+		"Expected to equal:",
+		"	d: 321",
+		"Actual:",
+		"\t- c: 123",
+		"Diff:",
+		"	--- Expected",
+		"	+++ Actual",
+		"	@@ -1,2 +1,2 @@",
+		"	-d: 321",
+		"	+- c: 123",
 	}, diff)
 }
 

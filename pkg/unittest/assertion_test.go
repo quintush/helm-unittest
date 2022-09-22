@@ -178,6 +178,7 @@ a: b
 c: [d]
 e:
   f: g
+z:
 `
 	manifest := common.K8sManifest{}
 	yaml.Unmarshal([]byte(manifestDoc), &manifest)

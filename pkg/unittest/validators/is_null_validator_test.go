@@ -93,15 +93,17 @@ func TestIsNullValidatorWhenInvalidPath(t *testing.T) {
 	manifest := makeManifest(doc)
 
 	validator := IsNullValidator{"x.b"}
-	pass, diff := validator.Validate(&ValidateContext{
+	pass, _ := validator.Validate(&ValidateContext{
 		Docs: []common.K8sManifest{manifest},
 	})
 
-	assert.False(t, pass)
-	assert.Equal(t, []string{
-		"DocumentIndex:	0",
-		"Error:",
-		"	can't get [\"b\"] from a non map type:",
-		"	null",
-	}, diff)
+	// After changed to jsonpath, all cases of invalid path including missing key will pass isNull validator
+	assert.True(t, pass) 
+	// assert.False(t, pass)
+	// assert.Equal(t, []string{
+	// 	"DocumentIndex:	0",
+	// 	"Error:",
+	// 	"	can't get [\"b\"] from a non map type:",
+	// 	"	null",
+	// }, diff)
 }

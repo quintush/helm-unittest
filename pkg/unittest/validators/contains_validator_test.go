@@ -24,6 +24,37 @@ a:
     - d: foo bar
 `
 
+// var docToTestContainsInnerArray = `
+// a:
+//   b:
+//     - d: foo bar
+//       name: nameOfAOuterArrayItem
+//       innerArray:
+//         - name: nameOfAInnerArrayItem
+//           value: valueOfAInggerArrayItem
+//     - e: more items
+// `
+
+// func TestContainsInnerArray(t *testing.T) {
+// 	manifest := makeManifest(docToTestContainsInnerArray)
+
+// 	validator := ContainsValidator{
+// 		"a.b",
+// 		map[interface{}]interface{}{
+// 			"d": "foo bar",
+// 			"innerArray": []map[interface{}]interface{}{{"name": "nameOfAInnerArrayItem"}, {"k2": "v2"}},
+// 		},
+// 		nil,
+// 		true,
+// 	}
+// 	pass, diff := validator.Validate(&ValidateContext{
+// 		Docs: []common.K8sManifest{manifest},
+// 	})
+
+// 	assert.True(t, pass)
+// 	assert.Equal(t, []string{}, diff)
+// }
+
 func TestContainsValidatorWhenOk(t *testing.T) {
 	manifest := makeManifest(docToTestContains)
 
@@ -352,8 +383,10 @@ func TestContainsValidatorWhenInvalidPath(t *testing.T) {
 	assert.False(t, pass)
 	assert.Equal(t, []string{
 		"DocumentIndex:	0",
-		"Error:",
-		"	can't get [\"e\"] from a non map type:",
+		"Path:	a.b.e",
+		"Expected to contain:",
+		"	- e: bar",
+		"Actual:",
 		"	- c: hello world",
 		"	- d: foo bar",
 		"	- e: bar",

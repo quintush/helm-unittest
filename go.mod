@@ -3,6 +3,7 @@ module github.com/lrills/helm-unittest
 go 1.16
 
 require (
+	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/bradleyjkemp/cupaloy/v2 v2.6.0
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect

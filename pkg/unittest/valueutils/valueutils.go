@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/lrills/helm-unittest/internal/common"
+	"github.com/PaesslerAG/jsonpath"
 )
 
 // GetValueOfSetPath get the value of the `--set` format path from a manifest
@@ -14,13 +15,21 @@ func GetValueOfSetPath(manifest common.K8sManifest, path string) (interface{}, e
 	if path == "" {
 		return manifest, nil
 	}
-	tr := fetchTraverser{manifest}
-	reader := bytes.NewBufferString(path)
-	if e := traverseSetPath(reader, &tr, expectKey); e != nil {
-		return nil, e
-	}
-	return tr.data, nil
+	return jsonpath.Get(path, manifest)
 }
+
+// // GetValueOfSetPath get the value of the `--set` format path from a manifest
+// func GetValueOfSetPath(manifest common.K8sManifest, path string) (interface{}, error) {
+// 	if path == "" {
+// 		return manifest, nil
+// 	}
+// 	tr := fetchTraverser{manifest}
+// 	reader := bytes.NewBufferString(path)
+// 	if e := traverseSetPath(reader, &tr, expectKey); e != nil {
+// 		return nil, e
+// 	}
+// 	return tr.data, nil
+// }
 
 // BuildValueOfSetPath build the complete form the `--set` format path and its value
 func BuildValueOfSetPath(val interface{}, path string) (map[interface{}]interface{}, error) {
