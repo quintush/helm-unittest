@@ -46,13 +46,14 @@ func TestGetValueOfSetPathError(t *testing.T) {
 	}
 
 	var expectionsMapping = map[string]string{
-		// "a.b[0].c": "unknown parameter a.b.0.c",
-		// // "a[0]":     "can't get [0] from a non array type:\nb:\n- _\nc.d: \"no\"\n",
-		// ",":        "parsing error: ,\t:1:1 - 1:2 unexpected \",\" while scanning extensions",
-		// "a.b[0[]]": "parsing error: a.b[0[]]\t:1:6 - 1:7 unexpected \"[\" while scanning array key expected \"]\"",
-		// "a[c[0]]":  "unknown parameter c",
-		// "x":           "unknown parameter x",
-		// "x.x":         "unknown parameter x",
+		"a.b[0].c": "unknown parameter a.b.0.c",
+		// jsonpath return nil from a[ on_existing_index ] 
+		// "a[0]":     "can't get [0] from a non array type:\nb:\n- _\nc.d: \"no\"\n",
+		",":        "parsing error: ,\t:1:1 - 1:2 unexpected \",\" while scanning extensions",
+		"a.b[0[]]": "parsing error: a.b[0[]]\t:1:6 - 1:7 unexpected \"[\" while scanning array key expected \"]\"",
+		"a[c[0]]":  "unknown parameter c",
+		"x":           "unknown parameter x",
+		"x.x":         "unknown parameter x",
 	}
 
 	for path, expect := range expectionsMapping {
