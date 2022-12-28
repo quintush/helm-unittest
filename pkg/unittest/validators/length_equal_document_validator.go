@@ -75,6 +75,7 @@ func (v LengthEqualDocumentsValidator) Validate(context *ValidateContext) (bool,
 				errorMessage := splitInfof(errorFormat, idx, fmt.Sprintf(
 					"count doesn't match. expected: %d != %d actual", v.Count, specLen))
 				validateErrors = append(validateErrors, errorMessage...)
+				continue
 			}
 		} else {
 			px := map[string]int{}
