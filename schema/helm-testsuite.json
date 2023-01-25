@@ -12,6 +12,9 @@
       "description": "The suite name to show on test result output.",
       "markdownDescription": "**suite** (string) _optional_\n\nThe suite name to show on test result output."
     },
+    "values" : {
+      "$ref": "#/definitions/values"
+    },
     "templates": {
       "$ref": "#/definitions/templates"
     },
@@ -738,6 +741,14 @@
       "type": "array",
       "description": "The template files scope to test in this suite. The full chart will be rendered, however only the listed templates are filtered for validation. Template files that are put in a templates sub-folder can be addressed with a linux path separator. Also the templates/ can be omitted. Partial templates (which are prefixed with and _) are added automatically even if it is in a templates sub-folder, you don't need to add them again.",
       "markdownDescription": "**templates** (array<string>) _recommended_\n\nThe template files scope to test in this suite. The full chart will be rendered, however only the listed templates are filtered for validation.\n\n Template files that are put in a templates sub-folder can be addressed with a linux path separator. Also the `templates/` can be omitted.\n\nPartial templates (which are prefixed with and _) are added automatically even if it is in a templates sub-folder, you don't need to add them again.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "values": {
+      "type": "array",
+      "description": "The test values to apply for rendering of this chart.",
+      "markdownDescription": "**values** (array<string>) _recommended_\n\n.The test values to apply for rendering of this chart.",
       "items": {
         "type": "string"
       }
