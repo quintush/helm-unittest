@@ -43,6 +43,7 @@ $ helm plugin install https://github.com/quintush/helm-unittest
 ```
 
 It will install the latest version of binary into helm plugin directory.
+> ***The latest version will point to latest version of [helm-unittest/helm-unittest](https://github.com/helm-unittest/helm-unittest).***
 
 ## Docker Usage
 
