@@ -125,7 +125,6 @@ defined in test suite files.
       --strict                 strict parse the testsuites (default false)
   -v, --values stringArray     absolute or glob paths of values files location, default no values files
   -f, --file stringArray       glob paths of test files location, default to tests\*_test.yaml (default [tests\*_test.yaml])
-  -3, --helm3                  parse helm charts as helm3 charts (default false)
   -q, --failfast               direct quit testing, when a test is failed (default false)
   -h, --help                   help for unittest
   -t, --output-type string     the file-format where testresults are written in, accepted types are (JUnit, NUnit, XUnit) (default XUnit)
