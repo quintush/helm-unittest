@@ -614,7 +614,7 @@ func (t *TestJob) parseManifestsFromOutputOfFiles(outputOfFiles map[string]strin
 	for file, rendered := range outputOfFiles {
 
 		switch filepath.Ext(file) {
-		case ".yaml":
+		case ".tpl", ".yaml", ".yml":
 			manifest, err := parseYamlFile(rendered)
 			if err != nil {
 				return nil, err
@@ -622,6 +622,9 @@ func (t *TestJob) parseManifestsFromOutputOfFiles(outputOfFiles map[string]strin
 			manifestsOfFiles[file] = manifest
 		case ".txt":
 			manifestsOfFiles[file] = parseTextFile(rendered)
+		default:
+			fmt.Printf("Extension %s is not supported. File %s is ignored.", filepath.Ext(file), file)
+			fmt.Println()
 		}
 
 	}
